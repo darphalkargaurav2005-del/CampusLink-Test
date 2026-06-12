@@ -400,7 +400,7 @@ export default function LandingPage() {
                       ))}
                     </div>
                     <div className="flex justify-between text-[9px] text-white/25 mt-1.5">
-                      {["J", "F", "M", "A", "M", "J", "J", "A", "S"].map(m => <span key={m}>{m}</span>)}
+                      {["J", "F", "M", "A", "M", "J", "J", "A", "S"].map((m, i) => <span key={`${m}-${i}`}>{m}</span>)}
                     </div>
                   </div>
                 </div>

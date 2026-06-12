@@ -75,8 +75,12 @@ export default function RegisterPage() {
   const strengthColor = ["", "bg-rose-500", "bg-amber-500", "bg-sky-500", "bg-emerald-500"][strength];
 
   const goNext = async () => {
-    const valid = await trigger(step === 1 ? ["role"] : ["fullName", "email", "phone"]);
+    const valid = await trigger(step === 1 ? ["role"] : ["fullName", "email", "phone", "institutionCode"]);
     if (valid) setStep(s => s + 1);
+  };
+
+  const onInvalid = () => {
+    toast.error("Please fix the highlighted fields before continuing.");
   };
 
   const onSubmit = async (data: FormData) => {
@@ -198,7 +202,7 @@ export default function RegisterPage() {
               ))}
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} noValidate>
+            <form onSubmit={handleSubmit(onSubmit, onInvalid)} noValidate>
               <AnimatePresence mode="wait">
                 {/* Step 1 — Role Selection */}
                 {step === 1 && (

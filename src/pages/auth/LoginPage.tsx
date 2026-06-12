@@ -11,7 +11,7 @@ import {
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { loginUser } from "@/lib/auth";
+import { loginUser, ROLE_LABELS } from "@/lib/auth";
 import type { UserRole } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +39,18 @@ const FEATURES = [
   { icon: BookOpen, title: "Digital Library", desc: "Complete library management system" },
 ];
 
+const DEMO_CREDENTIALS: Array<{
+  role: UserRole;
+  email: string;
+  password: string;
+}> = [
+  { role: "admin", email: "admin@campus.edu", password: "admin123" },
+  { role: "teacher", email: "teacher@campus.edu", password: "teacher123" },
+  { role: "student", email: "student@campus.edu", password: "student123" },
+  { role: "parent", email: "parent@campus.edu", password: "parent123" },
+  { role: "librarian", email: "librarian@campus.edu", password: "lib123" },
+];
+
 export default function LoginPage() {
   const { login } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -46,10 +58,17 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { role: "", remember: false },
   });
+
+  const fillDemoCredentials = (credential: (typeof DEMO_CREDENTIALS)[number]) => {
+    setValue("role", credential.role, { shouldDirty: true, shouldTouch: true, shouldValidate: true });
+    setValue("email", credential.email, { shouldDirty: true, shouldTouch: true, shouldValidate: true });
+    setValue("password", credential.password, { shouldDirty: true, shouldTouch: true, shouldValidate: true });
+    toast.message(`Loaded ${ROLE_LABELS[credential.role]} demo credentials.`);
+  };
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
@@ -255,6 +274,35 @@ export default function LoginPage() {
                 ) : "Sign In to CampusLink"}
               </button>
             </form>
+
+            <div className="mt-5 rounded-2xl border border-border bg-muted/30 p-4">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Demo credentials</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Pick a role to auto-fill a working sign-in.</p>
+                </div>
+                <span className="text-[10px] uppercase tracking-widest text-muted-foreground">One click</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {DEMO_CREDENTIALS.map(credential => (
+                  <button
+                    key={credential.role}
+                    type="button"
+                    onClick={() => fillDemoCredentials(credential)}
+                    className="flex items-center justify-between gap-3 rounded-xl border border-border bg-background px-3 py-2.5 text-left hover:border-primary/40 hover:bg-primary/5 transition-colors"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{ROLE_LABELS[credential.role]}</p>
+                      <p className="text-[11px] text-muted-foreground">{credential.email}</p>
+                    </div>
+                    <span className="text-[11px] font-medium text-primary">Load</span>
+                  </button>
+                ))}
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-3 break-all">
+                Passwords: admin123, teacher123, student123, parent123, lib123
+              </p>
+            </div>
 
             <p className="text-center text-sm text-muted-foreground mt-6">
               Don&apos;t have an account?{" "}
