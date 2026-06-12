@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Lock, Mail, User, Phone, ChevronDown, Sun, Moon, GraduationCap, Users, BookOpen, BarChart3, Shield } from "lucide-react";
+import {
+  Eye, EyeOff, Lock, Mail, ChevronDown, Sun, Moon,
+  GraduationCap, Users, BookOpen, BarChart3, Shield, ArrowLeft
+} from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -29,14 +32,6 @@ const ROLES = [
   { value: "librarian", label: "Librarian" },
 ];
 
-const DEMO_CREDENTIALS = [
-  { role: "admin", label: "Admin", email: "admin@campus.edu", password: "admin123", color: "from-violet-500 to-indigo-600" },
-  { role: "teacher", label: "Teacher", email: "teacher@campus.edu", password: "teacher123", color: "from-sky-500 to-blue-600" },
-  { role: "student", label: "Student", email: "student@campus.edu", password: "student123", color: "from-emerald-500 to-teal-600" },
-  { role: "parent", label: "Parent", email: "parent@campus.edu", password: "parent123", color: "from-amber-500 to-orange-600" },
-  { role: "librarian", label: "Librarian", email: "librarian@campus.edu", password: "lib123", color: "from-rose-500 to-pink-600" },
-];
-
 const FEATURES = [
   { icon: GraduationCap, title: "Smart Academics", desc: "AI-powered learning management" },
   { icon: Users, title: "Role-Based Access", desc: "5 distinct portals for all stakeholders" },
@@ -47,15 +42,14 @@ const FEATURES = [
 export default function LoginPage() {
   const { login } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { role: "", remember: false },
   });
-
-  const selectedRole = watch("role");
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
@@ -75,18 +69,10 @@ export default function LoginPage() {
     login(user, data.remember);
   };
 
-  const fillDemo = (email: string, password: string, role: string) => {
-    setValue("email", email);
-    setValue("password", password);
-    setValue("role", role as UserRole);
-    toast.info(`Demo credentials for ${role} filled in`);
-  };
-
   return (
     <div className="min-h-screen flex bg-background">
       {/* Left Panel */}
       <div className="hidden lg:flex flex-col w-[520px] xl:w-[600px] relative overflow-hidden gradient-brand">
-        {/* Background decorations */}
         <div className="absolute inset-0">
           <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
           <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl" />
@@ -94,18 +80,19 @@ export default function LoginPage() {
         </div>
 
         <div className="relative z-10 flex flex-col h-full p-10">
-          {/* Logo */}
+          {/* Logo - clickable to go to landing */}
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-3 mb-12">
-            <div className="w-11 h-11 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30">
-              <Shield size={22} className="text-white" />
-            </div>
-            <div>
-              <span className="text-white font-bold text-xl font-display tracking-tight">CampusLink</span>
-              <p className="text-white/60 text-xs">College ERP Platform</p>
-            </div>
+            <Link to="/" className="flex items-center gap-3 group">
+              <div className="w-11 h-11 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30 group-hover:bg-white/30 transition-colors">
+                <Shield size={22} className="text-white" />
+              </div>
+              <div>
+                <span className="text-white font-bold text-xl font-display tracking-tight">CampusLink</span>
+                <p className="text-white/60 text-xs">College ERP Platform</p>
+              </div>
+            </Link>
           </motion.div>
 
-          {/* Headline */}
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="mb-10">
             <h2 className="text-4xl xl:text-5xl font-bold text-white leading-tight font-display mb-4">
               The Future of College Management
@@ -115,7 +102,6 @@ export default function LoginPage() {
             </p>
           </motion.div>
 
-          {/* Feature Pills */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="grid grid-cols-2 gap-3 mb-10">
             {FEATURES.map((f, i) => (
               <motion.div key={i} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.35 + i * 0.07 }}
@@ -129,7 +115,6 @@ export default function LoginPage() {
             ))}
           </motion.div>
 
-          {/* Stats */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="flex items-center gap-8 mt-auto">
             {[
               { value: "2,400+", label: "Students" },
@@ -146,21 +131,34 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right Panel - Login Form */}
+      {/* Right Panel */}
       <div className="flex-1 flex flex-col overflow-y-auto">
         {/* Top bar */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <div className="flex items-center gap-2.5 lg:hidden">
-            <div className="w-8 h-8 rounded-xl gradient-brand flex items-center justify-center">
-              <Shield size={16} className="text-white" />
-            </div>
-            <span className="font-bold text-foreground font-display">CampusLink</span>
-          </div>
-          <div className="ml-auto">
-            <button onClick={toggleTheme} className="p-2.5 rounded-xl border border-border hover:bg-muted transition-colors" aria-label="Toggle theme">
-              {theme === "light" ? <Moon size={17} className="text-muted-foreground" /> : <Sun size={17} className="text-muted-foreground" />}
+          <div className="flex items-center gap-3">
+            {/* Back button */}
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+            >
+              <ArrowLeft size={15} className="group-hover:-translate-x-0.5 transition-transform" />
+              <span className="hidden sm:block">Back to Home</span>
             </button>
+            {/* Mobile logo */}
+            <Link to="/" className="flex items-center gap-2.5 lg:hidden ml-2">
+              <div className="w-8 h-8 rounded-xl gradient-brand flex items-center justify-center">
+                <Shield size={16} className="text-white" />
+              </div>
+              <span className="font-bold text-foreground font-display">CampusLink</span>
+            </Link>
           </div>
+          <button
+            onClick={toggleTheme}
+            className="p-2.5 rounded-xl border border-border hover:bg-muted transition-colors"
+            aria-label="Toggle theme"
+          >
+            {theme === "light" ? <Moon size={17} className="text-muted-foreground" /> : <Sun size={17} className="text-muted-foreground" />}
+          </button>
         </div>
 
         <div className="flex-1 flex items-center justify-center p-6 lg:p-10">
@@ -187,7 +185,7 @@ export default function LoginPage() {
                   </select>
                   <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                 </div>
-                {errors.role && <p className="text-rose-500 text-xs mt-1.5 flex items-center gap-1">{errors.role.message}</p>}
+                {errors.role && <p className="text-rose-500 text-xs mt-1.5">{errors.role.message}</p>}
               </div>
 
               {/* Email */}
@@ -258,7 +256,10 @@ export default function LoginPage() {
               </button>
             </form>
 
-
+            <p className="text-center text-sm text-muted-foreground mt-6">
+              Don&apos;t have an account?{" "}
+              <Link to="/register" className="text-primary font-semibold hover:underline">Create account</Link>
+            </p>
           </motion.div>
         </div>
       </div>

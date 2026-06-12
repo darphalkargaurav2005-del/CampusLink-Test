@@ -73,6 +73,7 @@ import BookRequests from "@/pages/librarian/BookRequests";
 import LibraryReports from "@/pages/librarian/LibraryReports";
 
 import LandingPage from "@/pages/LandingPage";
+import RegisterPage from "@/pages/auth/RegisterPage";
 import NotFound from "@/pages/NotFound";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 
@@ -81,6 +82,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
       {/* Admin Routes */}
