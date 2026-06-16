@@ -21,7 +21,7 @@ type FormData = z.infer<typeof schema>;
 
 export default function IssueBooks() {
   const [books, setBooks] = useState<Book[]>([...store.books]);
-  const [issuedList, setIssuedList] = useState<(BookIssue & { bookTitle: string; borrowerName: string })[]>([]);
+  const [issuedList, setIssuedList] = useState<BookIssue[]>([...store.bookIssues]);
   const [searchIssued, setSearchIssued] = useState("");
   const [, forceRender] = useState(0);
 
@@ -58,7 +58,7 @@ export default function IssueBooks() {
     store.books = updatedBooks;
 
     // Create issue record
-    const issueRecord: BookIssue & { bookTitle: string; borrowerName: string } = {
+    const issueRecord: BookIssue = {
       id: `bi${Date.now()}`,
       bookId: data.bookId,
       bookTitle: book.title,

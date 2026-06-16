@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, GraduationCap, UserCog, UserCheck, BookOpen, BookCopy, ClipboardList, Wallet, CalendarCheck, Calendar, Bell, BarChart3, Bot, MessageSquare, Settings } from "lucide-react";
+import { LayoutDashboard, Users, GraduationCap, UserCog, UserCheck, BookOpen, BookCopy, ClipboardList, Wallet, CalendarCheck, Calendar, Bell, BarChart3, Bot, MessageSquare, Settings, History } from "lucide-react";
 import Sidebar, { type NavItem } from "./Sidebar";
 import Navbar from "./Navbar";
 import Breadcrumb from "./Breadcrumb";
@@ -21,11 +21,12 @@ const navItems: NavItem[] = [
   { label: "Reports & Analytics", path: "/admin/reports", icon: BarChart3 },
   { label: "AI Assistant", path: "/admin/ai", icon: Bot },
   { label: "Chats", path: "/admin/chats", icon: MessageSquare },
+  { label: "History", path: "/admin/history", icon: History },
   { label: "Settings", path: "/admin/settings", icon: Settings },
 ];
 
 export default function AdminLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1024);
   const location = useLocation();
 
   return (

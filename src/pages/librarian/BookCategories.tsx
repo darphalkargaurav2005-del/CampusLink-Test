@@ -6,6 +6,7 @@ import PageHeader from "@/components/features/PageHeader";
 import Modal from "@/components/features/Modal";
 import { store } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { useDeleteConfirm } from "@/contexts/DeleteConfirmContext";
 
 const COLOR_OPTIONS = [
   "#4f46e5", "#8b5cf6", "#0ea5e9", "#10b981", "#f59e0b",
@@ -23,10 +24,10 @@ export default function BookCategories() {
   const [categories, setCategories] = useState<Category[]>([...store.bookCategories]);
   const [modalOpen, setModalOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editCat, setEditCat] = useState<Category | null>(null);
   const [formData, setFormData] = useState({ name: "", color: "#4f46e5" });
   const [formError, setFormError] = useState("");
+  const { confirmDelete } = useDeleteConfirm();
 
   useEffect(() => { store.bookCategories = categories; }, [categories]);
 
@@ -64,15 +65,7 @@ export default function BookCategories() {
     setFormError("");
   };
 
-  const handleDelete = (id: string) => {
-    const cat = categories.find(c => c.id === id);
-    if (cat) {
-      store.addHistory({ action: "deleted", itemType: "Category", itemName: cat.name, timestamp: new Date().toLocaleString("en-IN"), details: `Category removed with ${cat.count} books` });
-    }
-    setCategories(prev => prev.filter(c => c.id !== id));
-    setDeleteId(null);
-    toast.success("Category removed");
-  };
+  // handleDelete removed in favor of global confirmDelete
 
   const historyItems = store.history.filter(h => h.itemType === "Category");
 
@@ -121,7 +114,15 @@ export default function BookCategories() {
                   <Edit2 size={14} />
                 </button>
                 <button
-                  onClick={() => setDeleteId(cat.id)}
+                  onClick={() => confirmDelete({
+                    title: "Remove Category",
+                    itemName: cat.name,
+                    itemType: "Category",
+                    onConfirm: () => {
+                      setCategories(prev => prev.filter(c => c.id !== cat.id));
+                      toast.success("Category removed");
+                    }
+                  })}
                   className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg text-muted-foreground hover:text-rose-600 transition-colors"
                   title="Delete category"
                 >
@@ -191,24 +192,7 @@ export default function BookCategories() {
         </div>
       </Modal>
 
-      {/* Delete Confirm */}
-      <Modal
-        open={!!deleteId}
-        onClose={() => setDeleteId(null)}
-        title="Remove Category"
-        subtitle="This will not delete associated books."
-        size="sm"
-        footer={
-          <>
-            <button onClick={() => setDeleteId(null)} className="px-4 py-2 text-sm border border-border rounded-xl hover:bg-muted transition-colors">Cancel</button>
-            <button onClick={() => handleDelete(deleteId!)} className="px-4 py-2 text-sm bg-rose-600 text-white rounded-xl hover:bg-rose-700 font-semibold">Remove</button>
-          </>
-        }
-      >
-        <p className="text-sm text-muted-foreground">
-          Remove category <strong className="text-foreground">"{categories.find(c => c.id === deleteId)?.name}"</strong>? Books in this category will not be deleted.
-        </p>
-      </Modal>
+      {/* Local Delete Confirm Modal removed */}
 
       {/* History Modal */}
       <Modal

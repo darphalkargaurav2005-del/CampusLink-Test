@@ -3,8 +3,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
-import { Save, User, Lock, Bell, Palette, Globe, Shield } from "lucide-react";
+import { Save, User, Lock, Bell, Palette, Globe, Shield, History } from "lucide-react";
 import { toast } from "sonner";
+import { useSearchParams } from "react-router-dom";
+import { store } from "@/lib/store";
 import PageHeader from "@/components/features/PageHeader";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -31,12 +33,15 @@ const TABS = [
   { id: "security", label: "Security", icon: Lock },
   { id: "notifications", label: "Notifications", icon: Bell },
   { id: "appearance", label: "Appearance", icon: Palette },
+  { id: "history", label: "Activity Log", icon: History },
 ];
 
 export default function Settings() {
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
-  const [activeTab, setActiveTab] = useState("profile");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") || "profile";
+  const setActiveTab = (tab: string) => setSearchParams({ tab });
   const [notifications, setNotifications] = useState({ email: true, push: true, sms: false, newsletter: false });
 
   const profileForm = useForm<ProfileData>({
@@ -191,6 +196,40 @@ export default function Settings() {
                       ))}
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "history" && (
+              <div>
+                <h2 className="font-semibold text-foreground text-base mb-5 font-display">Activity & Audit Logs</h2>
+                <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+                  {store.history.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">No activity logs found</p>
+                  ) : (
+                    store.history.map((entry) => (
+                      <div key={entry.id} className="flex items-start gap-3 p-3.5 rounded-xl bg-muted/40 hover:bg-muted/70 transition-colors border border-border/30">
+                        <div className={cn("w-2 h-2 mt-1.5 rounded-full flex-shrink-0", {
+                          "bg-emerald-500": entry.action === "added",
+                          "bg-rose-500": entry.action === "deleted",
+                          "bg-amber-500": entry.action === "edited",
+                        })} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <span className={cn("text-[10px] font-bold uppercase px-1.5 py-0.5 rounded", {
+                              "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400": entry.action === "added",
+                              "bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400": entry.action === "deleted",
+                              "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400": entry.action === "edited",
+                            })}>{entry.action}</span>
+                            <span className="text-xs font-semibold text-muted-foreground">{entry.itemType}</span>
+                            <p className="text-sm font-semibold text-foreground truncate">{entry.itemName}</p>
+                          </div>
+                          {entry.details && <p className="text-xs text-muted-foreground leading-relaxed">{entry.details}</p>}
+                          <p className="text-[10px] text-muted-foreground/60 mt-1">{entry.timestamp}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             )}

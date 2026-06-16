@@ -10,6 +10,7 @@ import Modal from "@/components/features/Modal";
 import { store } from "@/lib/store";
 import type { Book } from "@/types";
 import { cn } from "@/lib/utils";
+import { useDeleteConfirm } from "@/contexts/DeleteConfirmContext";
 
 const schema = z.object({
   title: z.string().min(2, "Title required"),
@@ -34,7 +35,7 @@ export default function Books() {
   const [modalOpen, setModalOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [editBook, setEditBook] = useState<Book | null>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const { confirmDelete } = useDeleteConfirm();
 
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -97,15 +98,7 @@ export default function Books() {
     reset();
   };
 
-  const handleDelete = (id: string) => {
-    const book = books.find(b => b.id === id);
-    if (book) {
-      store.addHistory({ action: "deleted", itemType: "Book", itemName: book.title, timestamp: new Date().toLocaleString("en-IN"), details: `Removed from ${book.location}` });
-    }
-    setBooks(prev => prev.filter(b => b.id !== id));
-    setDeleteId(null);
-    toast.success("Book removed from library");
-  };
+  // handleDelete removed in favor of global confirmDelete
 
   const clearFilters = () => { setSearch(""); setCategoryFilter("all"); setStatusFilter("all"); };
   const hasActiveFilters = search || categoryFilter !== "all" || statusFilter !== "all";
@@ -246,7 +239,15 @@ export default function Books() {
                           <Edit2 size={14} />
                         </button>
                         <button
-                          onClick={() => setDeleteId(book.id)}
+                          onClick={() => confirmDelete({
+                            title: "Remove Book",
+                            itemName: book.title,
+                            itemType: "Book",
+                            onConfirm: () => {
+                              setBooks(prev => prev.filter(b => b.id !== book.id));
+                              toast.success("Book removed from library");
+                            }
+                          })}
                           className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg text-muted-foreground hover:text-rose-600 transition-colors"
                           title="Delete book"
                         >
@@ -315,22 +316,7 @@ export default function Books() {
         </div>
       </Modal>
 
-      {/* Delete Confirm */}
-      <Modal
-        open={!!deleteId}
-        onClose={() => setDeleteId(null)}
-        title="Remove Book"
-        subtitle="This action cannot be undone."
-        size="sm"
-        footer={
-          <>
-            <button onClick={() => setDeleteId(null)} className="px-4 py-2 text-sm border border-border rounded-xl hover:bg-muted transition-colors">Cancel</button>
-            <button onClick={() => handleDelete(deleteId!)} className="px-4 py-2 text-sm bg-rose-600 text-white rounded-xl hover:bg-rose-700 font-semibold">Delete</button>
-          </>
-        }
-      >
-        <p className="text-sm text-muted-foreground">Are you sure you want to remove <strong className="text-foreground">{books.find(b => b.id === deleteId)?.title}</strong> from the library?</p>
-      </Modal>
+      {/* Local Delete Confirm removed */}
 
       {/* History Modal */}
       <Modal

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import PageHeader from "@/components/features/PageHeader";
 import Modal from "@/components/features/Modal";
+import { useDeleteConfirm } from "@/contexts/DeleteConfirmContext";
 
 const schema = z.object({
   name: z.string().min(2, "Class name required"),
@@ -32,6 +33,7 @@ export default function ClassManagement() {
   const [classes, setClasses] = useState(INITIAL_CLASSES);
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const { confirmDelete } = useDeleteConfirm();
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) });
 
@@ -82,7 +84,18 @@ export default function ClassManagement() {
                 <button onClick={() => openEdit(cls)} className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground">
                   <Edit2 size={14} />
                 </button>
-                <button onClick={() => { setClasses(prev => prev.filter(c => c.id !== cls.id)); toast.success("Class removed"); }} className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors text-muted-foreground hover:text-rose-600">
+                <button
+                  onClick={() => confirmDelete({
+                    title: "Remove Class",
+                    itemName: cls.name,
+                    itemType: "Class",
+                    onConfirm: () => {
+                      setClasses(prev => prev.filter(c => c.id !== cls.id));
+                      toast.success("Class removed");
+                    }
+                  })}
+                  className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors text-muted-foreground hover:text-rose-600"
+                >
                   <Trash2 size={14} />
                 </button>
               </div>

@@ -12,6 +12,7 @@ import {
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
 import heroCampus from "@/assets/hero-campus.jpg";
+import Modal from "@/components/features/Modal";
 
 /* ─── NAV DATA ─────────────────────────────────────────── */
 const PLATFORM_ITEMS = [
@@ -23,9 +24,9 @@ const PLATFORM_ITEMS = [
 ];
 
 const RESOURCES_ITEMS = [
-  { label: "Blog", href: "#about", icon: Newspaper, desc: "Latest news & updates" },
-  { label: "FAQ", href: "#faq", icon: HelpCircle, desc: "Frequently asked questions" },
-  { label: "Career Guidance", href: "#about", icon: Compass, desc: "Student career pathways" },
+  { label: "Blog", href: "#", icon: Newspaper, desc: "Latest news & updates", modalKey: "blog" },
+  { label: "FAQ", href: "#", icon: HelpCircle, desc: "Frequently asked questions", modalKey: "faq" },
+  { label: "Career Guidance", href: "#", icon: Compass, desc: "Student career pathways", modalKey: "career" },
 ];
 
 const FOOTER_PLATFORM = ["Features", "Pricing", "Parents", "Students", "Teachers", "Institute", "Librarian"];
@@ -72,7 +73,15 @@ const PRICING = [
 ];
 
 /* ─── DROPDOWN COMPONENT ──────────────────────────────── */
-function NavDropdown({ label, items }: { label: string; items: { label: string; href: string; icon: any; desc: string }[] }) {
+function NavDropdown({
+  label,
+  items,
+  onItemClick,
+}: {
+  label: string;
+  items: { label: string; href: string; icon: any; desc: string; modalKey?: string }[];
+  onItemClick?: (modalKey: string) => void;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -102,22 +111,45 @@ function NavDropdown({ label, items }: { label: string; items: { label: string; 
             transition={{ duration: 0.15 }}
             className="absolute top-full left-0 mt-1.5 w-64 bg-card border border-border rounded-2xl shadow-modal overflow-hidden z-50"
           >
-            {items.map((item, i) => (
-              <Link
-                key={i}
-                to={item.href}
-                onClick={() => setOpen(false)}
-                className="flex items-start gap-3 px-4 py-3 hover:bg-muted/60 transition-colors"
-              >
-                <div className="w-8 h-8 rounded-lg bg-brand-50 dark:bg-brand-950/30 flex items-center justify-center mt-0.5 flex-shrink-0">
-                  <item.icon size={15} className="text-brand-600 dark:text-brand-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">{item.label}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
-                </div>
-              </Link>
-            ))}
+            {items.map((item, i) => {
+              const content = (
+                <>
+                  <div className="w-8 h-8 rounded-lg bg-brand-50 dark:bg-brand-950/30 flex items-center justify-center mt-0.5 flex-shrink-0">
+                    <item.icon size={15} className="text-brand-600 dark:text-brand-400" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                  </div>
+                </>
+              );
+
+              if (item.modalKey && onItemClick) {
+                return (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      setOpen(false);
+                      onItemClick(item.modalKey!);
+                    }}
+                    className="flex items-start gap-3 w-full px-4 py-3 hover:bg-muted/60 transition-colors text-left"
+                  >
+                    {content}
+                  </button>
+                );
+              }
+
+              return (
+                <Link
+                  key={i}
+                  to={item.href}
+                  onClick={() => setOpen(false)}
+                  className="flex items-start gap-3 px-4 py-3 hover:bg-muted/60 transition-colors"
+                >
+                  {content}
+                </Link>
+              );
+            })}
           </motion.div>
         )}
       </AnimatePresence>
@@ -132,6 +164,7 @@ export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activePortal, setActivePortal] = useState(0);
   const [scrolled, setScrolled] = useState(false);
+  const [activeModal, setActiveModal] = useState<"blog" | "faq" | "career" | "tutors" | "courses" | null>(null);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 60);
@@ -144,7 +177,7 @@ export default function LandingPage() {
       {/* ── NAVBAR ── */}
       <nav className={cn(
         "fixed top-0 inset-x-0 z-50 transition-all duration-300",
-        scrolled
+        (scrolled || mobileMenuOpen)
           ? "bg-background/95 backdrop-blur-md border-b border-border shadow-sm"
           : "bg-transparent border-b border-transparent"
       )}>
@@ -155,7 +188,7 @@ export default function LandingPage() {
               <div className="w-9 h-9 rounded-xl gradient-brand flex items-center justify-center shadow-sm">
                 <Shield size={18} className="text-white" />
               </div>
-              <span className={cn("font-bold text-lg font-display transition-colors", scrolled ? "text-foreground" : "text-white")}>
+              <span className={cn("font-bold text-lg font-display transition-colors", (scrolled || mobileMenuOpen) ? "text-foreground" : "text-white")}>
                 CampusLink
               </span>
             </Link>
@@ -163,35 +196,54 @@ export default function LandingPage() {
             {/* Desktop Nav */}
             <div className="hidden lg:flex items-center gap-0.5">
               {/* Platform dropdown */}
-              <div className={cn("transition-colors", !scrolled && "[&_button]:text-white/80 [&_button:hover]:text-white [&_button:hover]:bg-white/10")}>
+              <div className={cn("transition-colors", !(scrolled || mobileMenuOpen) && "[&_button]:text-white/80 [&_button:hover]:text-white [&_button:hover]:bg-white/10")}>
                 <NavDropdown label="Platform" items={PLATFORM_ITEMS} />
               </div>
 
-              {["Courses", "Tutors", "Pricing"].map(label => (
-                <a
-                  key={label}
-                  href={label === "Pricing" ? "#pricing" : "#features"}
-                  className={cn(
-                    "px-3 py-2 text-sm font-medium rounded-lg transition-all",
-                    scrolled
-                      ? "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                      : "text-white/80 hover:text-white hover:bg-white/10"
-                  )}
-                >
-                  {label}
-                </a>
-              ))}
+              {["Courses", "Tutors", "Pricing"].map(label => {
+                if (label === "Pricing") {
+                  return (
+                    <a
+                      key={label}
+                      href="#pricing"
+                      className={cn(
+                        "px-3 py-2 text-sm font-medium rounded-lg transition-all",
+                        (scrolled || mobileMenuOpen)
+                          ? "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                          : "text-white/80 hover:text-white hover:bg-white/10"
+                      )}
+                    >
+                      {label}
+                    </a>
+                  );
+                }
+                const modalKey = label === "Courses" ? "courses" : "tutors";
+                return (
+                  <button
+                    key={label}
+                    onClick={() => setActiveModal(modalKey)}
+                    className={cn(
+                      "px-3 py-2 text-sm font-medium rounded-lg transition-all text-left",
+                      (scrolled || mobileMenuOpen)
+                        ? "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                        : "text-white/80 hover:text-white hover:bg-white/10"
+                    )}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
 
               {/* Resources dropdown */}
-              <div className={cn("transition-colors", !scrolled && "[&_button]:text-white/80 [&_button:hover]:text-white [&_button:hover]:bg-white/10")}>
-                <NavDropdown label="Resources" items={RESOURCES_ITEMS} />
+              <div className={cn("transition-colors", !(scrolled || mobileMenuOpen) && "[&_button]:text-white/80 [&_button:hover]:text-white [&_button:hover]:bg-white/10")}>
+                <NavDropdown label="Resources" items={RESOURCES_ITEMS} onItemClick={(key) => setActiveModal(key as any)} />
               </div>
 
               <a
                 href="#about"
                 className={cn(
                   "px-3 py-2 text-sm font-medium rounded-lg transition-all",
-                  scrolled
+                  (scrolled || mobileMenuOpen)
                     ? "text-muted-foreground hover:text-foreground hover:bg-muted/60"
                     : "text-white/80 hover:text-white hover:bg-white/10"
                 )}
@@ -205,7 +257,7 @@ export default function LandingPage() {
                 onClick={toggleTheme}
                 className={cn(
                   "p-2.5 rounded-xl border transition-colors",
-                  scrolled
+                  (scrolled || mobileMenuOpen)
                     ? "border-border hover:bg-muted text-muted-foreground"
                     : "border-white/20 hover:bg-white/10 text-white/80"
                 )}
@@ -216,7 +268,7 @@ export default function LandingPage() {
                 to="/register"
                 className={cn(
                   "px-4 py-2 text-sm font-semibold rounded-xl border transition-all",
-                  scrolled
+                  (scrolled || mobileMenuOpen)
                     ? "border-border text-foreground hover:bg-muted"
                     : "border-white/30 text-white hover:bg-white/10"
                 )}
@@ -236,12 +288,14 @@ export default function LandingPage() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className={cn(
                 "lg:hidden p-2.5 rounded-xl border transition-colors",
-                scrolled ? "border-border hover:bg-muted" : "border-white/20 hover:bg-white/10"
+                (scrolled || mobileMenuOpen)
+                  ? "border-border hover:bg-muted text-foreground"
+                  : "border-white/20 hover:bg-white/10 text-white"
               )}
             >
               {mobileMenuOpen
-                ? <X size={18} className={scrolled ? "text-foreground" : "text-white"} />
-                : <Menu size={18} className={scrolled ? "text-foreground" : "text-white"} />
+                ? <X size={18} />
+                : <Menu size={18} />
               }
             </button>
           </div>
@@ -266,11 +320,31 @@ export default function LandingPage() {
                   </Link>
                 ))}
                 <div className="border-t border-border my-2" />
-                {["Courses", "Tutors", "Pricing", "About"].map(l => (
-                  <a key={l} href={l === "Pricing" ? "#pricing" : "#about"} onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2.5 rounded-xl text-sm font-medium text-foreground hover:bg-muted transition-colors">
-                    {l}
-                  </a>
+                {["Courses", "Tutors", "Pricing", "About"].map(l => {
+                  if (l === "Pricing" || l === "About") {
+                    return (
+                      <a key={l} href={l === "Pricing" ? "#pricing" : "#about"} onClick={() => setMobileMenuOpen(false)}
+                        className="block px-3 py-2.5 rounded-xl text-sm font-medium text-foreground hover:bg-muted transition-colors">
+                        {l}
+                      </a>
+                    );
+                  }
+                  const modalKey = l === "Courses" ? "courses" : "tutors";
+                  return (
+                    <button key={l} onClick={() => { setMobileMenuOpen(false); setActiveModal(modalKey); }}
+                      className="block w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-foreground hover:bg-muted transition-colors">
+                      {l}
+                    </button>
+                  );
+                })}
+                <div className="border-t border-border my-2" />
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-3 mb-2">Resources</p>
+                {RESOURCES_ITEMS.map((item, i) => (
+                  <button key={i} onClick={() => { setMobileMenuOpen(false); setActiveModal(item.modalKey as any); }}
+                    className="flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-foreground hover:bg-muted transition-colors">
+                    <item.icon size={16} className="text-brand-500" />
+                    {item.label}
+                  </button>
                 ))}
                 <div className="border-t border-border my-2" />
                 <div className="flex gap-2 pt-1">
@@ -308,7 +382,7 @@ export default function LandingPage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Left — text */}
-            <div className="lg:col-span-6 xl:col-span-7">
+            <div className="lg:col-span-12 text-center flex flex-col items-center justify-center max-w-3xl mx-auto w-full">
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
                 className="inline-flex items-center gap-2 bg-white/8 backdrop-blur-sm border border-white/15 rounded-full px-4 py-1.5 mb-7">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -316,7 +390,7 @@ export default function LandingPage() {
               </motion.div>
 
               <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
-                className="text-5xl xl:text-6xl 2xl:text-7xl font-bold text-white font-display leading-[1.04] mb-6">
+                className="text-5xl xl:text-6xl 2xl:text-7xl font-bold text-white font-display leading-[1.04] mb-6 text-center">
                 Smarter College
                 <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-violet-300 to-purple-300">
@@ -327,12 +401,12 @@ export default function LandingPage() {
               </motion.h1>
 
               <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                className="text-white/65 text-lg leading-relaxed mb-8 max-w-lg">
+                className="text-white/65 text-lg leading-relaxed mb-8 max-w-2xl mx-auto text-center">
                 CampusLink unifies your entire institution — students, teachers, parents, and administration — on one powerful, intelligent platform.
               </motion.p>
 
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.42 }}
-                className="flex flex-wrap items-center gap-3 mb-9">
+                className="flex flex-wrap items-center justify-center gap-3 mb-9">
                 <Link to="/register"
                   className="flex items-center gap-2 px-7 py-3.5 gradient-brand text-white font-bold rounded-2xl hover:opacity-90 transition-all shadow-xl shadow-indigo-500/30 text-sm">
                   Get Started Free <ArrowRight size={16} />
@@ -345,83 +419,13 @@ export default function LandingPage() {
               </motion.div>
 
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}
-                className="flex items-center gap-5 flex-wrap">
+                className="flex items-center justify-center gap-5 flex-wrap">
                 {["No Credit Card Required", "GDPR Compliant", "99.9% Uptime SLA"].map((badge, i) => (
                   <div key={i} className="flex items-center gap-1.5 text-white/55 text-xs">
                     <CheckCircle2 size={13} className="text-emerald-400 flex-shrink-0" />
                     <span>{badge}</span>
                   </div>
                 ))}
-              </motion.div>
-            </div>
-
-            {/* Right — dashboard card */}
-            <div className="lg:col-span-6 xl:col-span-5 hidden lg:block">
-              <motion.div initial={{ opacity: 0, x: 40, y: 10 }} animate={{ opacity: 1, x: 0, y: 0 }} transition={{ delay: 0.28, duration: 0.5 }}
-                className="relative">
-                <div className="bg-white/8 backdrop-blur-2xl border border-white/15 rounded-3xl p-6 shadow-2xl">
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="w-10 h-10 rounded-2xl gradient-brand flex items-center justify-center shadow-md">
-                      <BarChart3 size={18} className="text-white" />
-                    </div>
-                    <div>
-                      <p className="text-white font-bold text-sm">Live Dashboard</p>
-                      <p className="text-white/45 text-xs">Real-time institutional metrics</p>
-                    </div>
-                    <div className="ml-auto flex items-center gap-1.5">
-                      <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                      <span className="text-emerald-400 text-xs font-semibold">Live</span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2.5 mb-4">
-                    {STATS.map((s, i) => (
-                      <motion.div key={i} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.55 + i * 0.08 }}
-                        className="bg-white/8 rounded-2xl p-3.5 border border-white/10">
-                        <div className="flex items-center gap-1.5 mb-1.5">
-                          <s.icon size={12} className="text-white/50" />
-                          <span className="text-white/50 text-[10px] font-medium">{s.label}</span>
-                        </div>
-                        <p className="text-xl font-bold text-white font-display">{s.value}</p>
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  <div className="bg-white/5 rounded-2xl p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-white/55 text-xs font-medium">Monthly Attendance Rate</span>
-                      <span className="text-emerald-400 font-bold text-sm">87.4%</span>
-                    </div>
-                    <div className="flex items-end gap-1 h-10">
-                      {[65, 72, 85, 78, 91, 83, 87, 89, 84].map((h, i) => (
-                        <motion.div key={i} initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.75 + i * 0.04, duration: 0.35 }}
-                          style={{ height: `${h}%` }}
-                          className="flex-1 bg-gradient-to-t from-indigo-500 to-violet-400 rounded-sm origin-bottom opacity-75" />
-                      ))}
-                    </div>
-                    <div className="flex justify-between text-[9px] text-white/25 mt-1.5">
-                      {["J", "F", "M", "A", "M", "J", "J", "A", "S"].map((m, i) => <span key={`${m}-${i}`}>{m}</span>)}
-                    </div>
-                  </div>
-                </div>
-
-                <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.85, type: "spring" }}
-                  className="absolute -top-4 -right-4 bg-emerald-500 text-white rounded-2xl px-3 py-2 text-xs font-bold shadow-lg shadow-emerald-500/30 flex items-center gap-1.5">
-                  <TrendingUp size={12} /> +12.4% Growth
-                </motion.div>
-
-                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.95 }}
-                  className="absolute -bottom-4 -left-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-3 shadow-xl">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-                      <Award size={14} className="text-amber-400" />
-                    </div>
-                    <div>
-                      <p className="text-white text-xs font-bold">Accredited ERP</p>
-                      <p className="text-white/45 text-[10px]">ISO 27001 Certified</p>
-                    </div>
-                  </div>
-                </motion.div>
               </motion.div>
             </div>
           </div>
@@ -468,49 +472,6 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* ── PORTALS ── */}
-      <section id="portals" className="py-20 lg:py-28 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-14">
-            <span className="inline-block bg-sky-50 dark:bg-sky-950/30 text-sky-600 dark:text-sky-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4 border border-sky-100 dark:border-sky-900">
-              Role-Based Portals
-            </span>
-            <h2 className="text-4xl font-bold text-foreground font-display mb-4">Dedicated Experience for Every Role</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">Five purpose-built portals ensure every stakeholder gets exactly the tools they need.</p>
-          </motion.div>
-          <div className="flex gap-2 justify-center flex-wrap mb-8">
-            {PORTALS.map((p, i) => (
-              <button key={i} onClick={() => setActivePortal(i)}
-                className={cn("flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all",
-                  activePortal === i ? "gradient-brand text-white shadow-lg" : "bg-card border border-border text-muted-foreground hover:text-foreground hover:bg-muted")}>
-                <p.icon size={15} /> {p.role}
-              </button>
-            ))}
-          </div>
-          <motion.div key={activePortal} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
-            className="bg-card border border-border rounded-3xl p-8 lg:p-10 shadow-lg max-w-3xl mx-auto">
-            <div className={`inline-flex items-center gap-3 bg-gradient-to-r ${PORTALS[activePortal].color} px-4 py-2 rounded-2xl mb-6`}>
-              {(() => { const Icon = PORTALS[activePortal].icon; return <Icon size={20} className="text-white" />; })()}
-              <span className="text-white font-bold text-sm">{PORTALS[activePortal].role} Portal</span>
-            </div>
-            <h3 className="text-2xl font-bold text-foreground font-display mb-3">{PORTALS[activePortal].role} Dashboard</h3>
-            <p className="text-muted-foreground text-base leading-relaxed mb-6">{PORTALS[activePortal].desc}</p>
-            <div className="grid grid-cols-2 gap-3 mb-8">
-              {PORTALS[activePortal].features.map((f, i) => (
-                <div key={i} className="flex items-center gap-2.5 bg-muted/50 rounded-xl px-4 py-3">
-                  <CheckCircle2 size={15} className="text-emerald-500 flex-shrink-0" />
-                  <span className="text-sm font-medium text-foreground">{f}</span>
-                </div>
-              ))}
-            </div>
-            <Link to="/login"
-              className={`inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r ${PORTALS[activePortal].color} text-white font-semibold rounded-xl hover:opacity-90 transition-opacity text-sm shadow-md`}>
-              Access {PORTALS[activePortal].role} Portal <ArrowRight size={15} />
-            </Link>
-          </motion.div>
         </div>
       </section>
 
@@ -704,6 +665,135 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* ── RESOURCE MODALS ── */}
+      <Modal
+        open={activeModal === "faq"}
+        onClose={() => setActiveModal(null)}
+        title="Frequently Asked Questions (FAQ)"
+        subtitle="Common questions about the CampusLink college ERP platform"
+        size="lg"
+      >
+        <div className="space-y-3">
+          {[
+            { q: "What is CampusLink?", a: "CampusLink is an AI-powered college ERP and Learning Management System designed to unify administrators, teachers, students, and parents." },
+            { q: "How can parents get access to the portal?", a: "Parents are registered by the college administration. Once registered, they will receive login credentials to monitor attendance and grades." },
+            { q: "Is the AI Assistant free to use for students?", a: "Yes! The AI assistant is a built-in feature designed to help students with questions, schedules, study plans, and performance analysis." },
+            { q: "How secure is my data on the platform?", a: "We take security seriously. CampusLink utilizes end-to-end SSL encryption, role-based strict page route guards, and is fully ISO 27001 certified." }
+          ].map((f, i) => (
+            <div key={i} className="p-3 bg-muted/40 rounded-xl border border-border/50">
+              <p className="font-semibold text-sm text-foreground">{f.q}</p>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{f.a}</p>
+            </div>
+          ))}
+        </div>
+      </Modal>
+
+      <Modal
+        open={activeModal === "blog"}
+        onClose={() => setActiveModal(null)}
+        title="CampusLink Insights Blog"
+        subtitle="Recent news, academic studies, and product updates"
+        size="lg"
+      >
+        <div className="space-y-4">
+          {[
+            { title: "AI in Modern Classrooms: The Future of Grading", date: "June 12, 2026", author: "Academic Office", excerpt: "Discover how teachers are using automated intelligence tools to evaluate marks and generate custom question banks using CampusLink AI." },
+            { title: "Connecting Parents with Academic Analytics", date: "May 28, 2026", author: "Liaison Officer", excerpt: "Learn how our live parent portal helps bridge the communication gap between faculty and families, providing live insights on student growth." },
+            { title: "Digital Libraries: Restructuring Campus Knowledge", date: "May 15, 2026", author: "Library Committee", excerpt: "Explore the new librarian dashboard features for real-time returns tracking, automated cataloging, and instant fine collection notifications." }
+          ].map((b, i) => (
+            <div key={i} className="p-4 bg-muted/30 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors">
+              <span className="text-[10px] text-primary font-medium">{b.date} • By {b.author}</span>
+              <h4 className="font-bold text-sm text-foreground mt-1 leading-snug hover:text-primary transition-colors cursor-pointer">{b.title}</h4>
+              <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{b.excerpt}</p>
+              <button className="text-xs text-primary font-semibold hover:underline mt-2.5 flex items-center gap-1">Read article <ArrowRight size={12} /></button>
+            </div>
+          ))}
+        </div>
+      </Modal>
+
+      <Modal
+        open={activeModal === "career"}
+        onClose={() => setActiveModal(null)}
+        title="Student Career Guidance Pathways"
+        subtitle="Recommended tracks and key capabilities for software engineering, analysis, and networks"
+        size="lg"
+      >
+        <div className="space-y-4">
+          {[
+            { track: "Full Stack Web Engineering", skills: "React, TypeScript, Node.js, DSA, System Design", courses: "CS401 Web Development, CS301 Data Structures", desc: "Focuses on building modern, scalable responsive interfaces and reliable back-end databases." },
+            { track: "Data Science & AI Analyst", skills: "Python, Machine Learning, Applied Calculus, DBMS", courses: "CS302 Database Systems, MA301 Engineering Math", desc: "Focuses on statistical modeling, data visualization, predictive analytics, and machine learning structures." },
+            { track: "Computer Networking & Cybersecurity", skills: "ISO/OSI model, Cryptography, Firewalls, TCP/IP", courses: "CS301 Data Structures, Computer Networks (CS-Shelf)", desc: "Focuses on network administration, secure information channels, encryption protocols, and server routing." }
+          ].map((c, i) => (
+            <div key={i} className="p-3.5 bg-muted/40 rounded-xl border border-border/50 hover:border-primary/40 transition-colors">
+              <span className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold px-1.5 py-0.5 rounded-full uppercase">Career Pathway</span>
+              <h4 className="font-bold text-sm text-foreground mt-2 leading-snug">{c.track}</h4>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{c.desc}</p>
+              <div className="mt-3 text-xs space-y-1">
+                <p><strong>Required Skills:</strong> <span className="text-muted-foreground">{c.skills}</span></p>
+                <p><strong>Recommended Courses:</strong> <span className="text-primary font-medium">{c.courses}</span></p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Modal>
+
+      <Modal
+        open={activeModal === "tutors"}
+        onClose={() => setActiveModal(null)}
+        title="Verified Campus Tutors"
+        subtitle="Department professors available for academic sessions"
+        size="lg"
+      >
+        <div className="space-y-4">
+          {[
+            { name: "Dr. Anand Kumar", dept: "Computer Science", spec: "Data Structures, Algorithms", time: "Mon, Wed, Fri 4:00 - 5:00 PM", initial: "A", color: "bg-sky-500" },
+            { name: "Prof. Meera Iyer", dept: "Mathematics", spec: "Calculus, Linear Algebra", time: "Tue, Thu 3:00 - 4:30 PM", initial: "M", color: "bg-violet-500" },
+            { name: "Mr. Ravi Shankar", dept: "Electronics", spec: "Digital Logic, Microprocessors", time: "Mon, Thu 2:00 - 3:30 PM", initial: "R", color: "bg-emerald-500" },
+            { name: "Mr. Kartik Verma", dept: "Computer Science", spec: "Web Development, DBMS", time: "Wed, Fri 1:30 - 3:00 PM", initial: "K", color: "bg-amber-500" }
+          ].map((t, i) => (
+            <div key={i} className="flex items-start gap-3 p-3 bg-muted/40 rounded-xl hover:bg-muted/70 transition-colors border border-border/50">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${t.color}`}>
+                {t.initial}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm text-foreground">{t.name}</p>
+                <p className="text-xs text-muted-foreground">{t.dept} Department</p>
+                <p className="text-xs text-foreground mt-1"><strong>Specializes in:</strong> {t.spec}</p>
+                <p className="text-[11px] text-primary mt-0.5"><strong>Availability:</strong> {t.time}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Modal>
+
+      <Modal
+        open={activeModal === "courses"}
+        onClose={() => setActiveModal(null)}
+        title="CampusLink Key Subjects & Courses"
+        subtitle="Core engineering and sciences subjects available in the ERP curriculum"
+        size="lg"
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {[
+            { code: "CS301", title: "Data Structures & Algorithms", credits: 4, sem: 5, desc: "Fundamental data structures and algorithm design." },
+            { code: "CS302", title: "Database Management Systems", credits: 3, sem: 5, desc: "Relational design, normalization, SQL, indexing." },
+            { code: "CS401", title: "Web Development", credits: 3, sem: 7, desc: "Modern full-stack web applications with React & Node." },
+            { code: "EC301", title: "Digital Electronics", credits: 3, sem: 5, desc: "Combinational and sequential logic circuit design." },
+            { code: "PH101", title: "Engineering Physics", credits: 3, sem: 1, desc: "Wave mechanics, optics, and quantum basics." },
+            { code: "MA301", title: "Engineering Mathematics III", credits: 4, sem: 5, desc: "Calculus, linear algebra, and complex variables." }
+          ].map((c, i) => (
+            <div key={i} className="p-3.5 bg-muted/40 rounded-xl border border-border/50 flex flex-col justify-between hover:border-primary/40 transition-colors">
+              <div>
+                <span className="text-[10px] bg-primary/10 text-primary font-bold px-1.5 py-0.5 rounded-full uppercase">{c.code} • {c.credits} Credits</span>
+                <h4 className="font-bold text-sm text-foreground mt-1.5 leading-snug">{c.title}</h4>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{c.desc}</p>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-2 font-medium">Semester {c.sem}</p>
+            </div>
+          ))}
+        </div>
+      </Modal>
     </div>
   );
 }

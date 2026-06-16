@@ -7,6 +7,7 @@ import Modal from "@/components/features/Modal";
 import { MOCK_SCHEDULES, MOCK_TEACHERS } from "@/constants/mockData";
 import type { Schedule } from "@/types";
 import { cn } from "@/lib/utils";
+import { useDeleteConfirm } from "@/contexts/DeleteConfirmContext";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const DAY_COLORS: Record<string, string> = {
@@ -22,12 +23,22 @@ export default function TeacherSchedule() {
   const [schedules, setSchedules] = useState<Schedule[]>(MOCK_SCHEDULES);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState("Monday");
+  const { confirmDelete } = useDeleteConfirm();
 
   const daySchedules = schedules.filter(s => s.day === selectedDay);
 
   const handleDelete = (id: string) => {
-    setSchedules(prev => prev.filter(s => s.id !== id));
-    toast.success("Schedule removed");
+    const schedule = schedules.find(s => s.id === id);
+    if (!schedule) return;
+    confirmDelete({
+      title: "Remove Schedule Entry",
+      itemName: `${schedule.courseName} (${schedule.day} ${schedule.startTime})`,
+      itemType: "Schedule Entry",
+      onConfirm: () => {
+        setSchedules(prev => prev.filter(s => s.id !== id));
+        toast.success("Schedule removed");
+      }
+    });
   };
 
   return (

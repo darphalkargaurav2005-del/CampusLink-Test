@@ -10,6 +10,7 @@ import Modal from "@/components/features/Modal";
 import { MOCK_ASSIGNMENTS } from "@/constants/mockData";
 import type { Assignment } from "@/types";
 import { cn } from "@/lib/utils";
+import { useDeleteConfirm } from "@/contexts/DeleteConfirmContext";
 
 const schema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -24,6 +25,7 @@ type FormData = z.infer<typeof schema>;
 export default function Assignments() {
   const [assignments, setAssignments] = useState<Assignment[]>(MOCK_ASSIGNMENTS);
   const [modalOpen, setModalOpen] = useState(false);
+  const { confirmDelete } = useDeleteConfirm();
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) });
 
@@ -84,7 +86,20 @@ export default function Assignments() {
                 </div>
                 <div className="flex gap-1 flex-shrink-0">
                   <button onClick={() => toast.info("Edit assignment")} className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground transition-colors"><Edit2 size={14} /></button>
-                  <button onClick={() => { setAssignments(prev => prev.filter(x => x.id !== a.id)); toast.success("Assignment deleted"); }} className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg text-muted-foreground hover:text-rose-600 transition-colors"><Trash2 size={14} /></button>
+                  <button
+                    onClick={() => confirmDelete({
+                      title: "Remove Assignment",
+                      itemName: a.title,
+                      itemType: "Assignment",
+                      onConfirm: () => {
+                        setAssignments(prev => prev.filter(x => x.id !== a.id));
+                        toast.success("Assignment deleted");
+                      }
+                    })}
+                    className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg text-muted-foreground hover:text-rose-600 transition-colors"
+                  >
+                    <Trash2 size={14} />
+                  </button>
                 </div>
               </div>
 

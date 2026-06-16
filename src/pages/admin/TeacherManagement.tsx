@@ -10,6 +10,7 @@ import Modal from "@/components/features/Modal";
 import { store } from "@/lib/store";
 import type { Teacher } from "@/types";
 import { cn } from "@/lib/utils";
+import { useDeleteConfirm } from "@/contexts/DeleteConfirmContext";
 
 const schema = z.object({
   name: z.string().min(2, "Name required"),
@@ -35,7 +36,7 @@ export default function TeacherManagement() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editTeacher, setEditTeacher] = useState<Teacher | null>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const { confirmDelete } = useDeleteConfirm();
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) });
 
@@ -212,7 +213,15 @@ export default function TeacherManagement() {
                   <Edit2 size={13} /> Edit
                 </button>
                 <button
-                  onClick={() => setDeleteId(teacher.id)}
+                  onClick={() => confirmDelete({
+                    title: "Remove Teacher",
+                    itemName: teacher.name,
+                    itemType: "Teacher",
+                    onConfirm: () => {
+                      setTeachers(prev => prev.filter(t => t.id !== teacher.id));
+                      toast.success("Teacher removed");
+                    }
+                  })}
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs border border-rose-200 dark:border-rose-900 text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
                 >
                   <Trash2 size={13} /> Remove
@@ -285,21 +294,6 @@ export default function TeacherManagement() {
         </div>
       </Modal>
 
-      {/* Delete Modal */}
-      <Modal
-        open={!!deleteId}
-        onClose={() => setDeleteId(null)}
-        title="Remove Teacher"
-        size="sm"
-        footer={
-          <>
-            <button onClick={() => setDeleteId(null)} className="px-4 py-2 text-sm border border-border rounded-xl hover:bg-muted transition-colors">Cancel</button>
-            <button onClick={() => { setTeachers(prev => prev.filter(t => t.id !== deleteId)); setDeleteId(null); toast.success("Teacher removed"); }} className="px-4 py-2 text-sm bg-rose-600 text-white rounded-xl font-semibold hover:bg-rose-700">Remove</button>
-          </>
-        }
-      >
-        <p className="text-sm text-muted-foreground">Are you sure you want to remove <strong className="text-foreground">{teachers.find(t => t.id === deleteId)?.name}</strong>?</p>
-      </Modal>
     </div>
   );
 }

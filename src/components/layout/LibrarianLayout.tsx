@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { LayoutDashboard, BookOpen, Tag, BookPlus, BookCheck, Users, UserCog, DollarSign, Inbox, BarChart3, Bot, Settings } from "lucide-react";
+import { LayoutDashboard, BookOpen, Tag, BookPlus, BookCheck, Users, UserCog, DollarSign, Inbox, BarChart3, Bot, Settings, History } from "lucide-react";
 import Sidebar, { type NavItem } from "./Sidebar";
 import Navbar from "./Navbar";
 import Breadcrumb from "./Breadcrumb";
@@ -17,11 +17,12 @@ const navItems: NavItem[] = [
   { label: "Book Requests", path: "/librarian/requests", icon: Inbox, badge: 3 },
   { label: "Reports", path: "/librarian/reports", icon: BarChart3 },
   { label: "AI Assistant", path: "/librarian/ai", icon: Bot },
+  { label: "History", path: "/librarian/history", icon: History },
   { label: "Settings", path: "/librarian/settings", icon: Settings },
 ];
 
 export default function LibrarianLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1024);
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">

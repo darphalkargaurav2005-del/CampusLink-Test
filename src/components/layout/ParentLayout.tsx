@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { LayoutDashboard, CalendarDays, TrendingUp, Phone, Bell, BarChart3, Activity, MessageSquare, Bot, Settings } from "lucide-react";
+import { LayoutDashboard, CalendarDays, TrendingUp, Phone, Bell, BarChart3, Activity, MessageSquare, Bot, Settings, History } from "lucide-react";
 import Sidebar, { type NavItem } from "./Sidebar";
 import Navbar from "./Navbar";
 import Breadcrumb from "./Breadcrumb";
@@ -15,11 +15,12 @@ const navItems: NavItem[] = [
   { label: "Growth Analysis", path: "/parent/growth", icon: Activity },
   { label: "Chats", path: "/parent/chats", icon: MessageSquare },
   { label: "AI Assistant", path: "/parent/ai", icon: Bot },
+  { label: "History", path: "/parent/history", icon: History },
   { label: "Settings", path: "/parent/settings", icon: Settings },
 ];
 
 export default function ParentLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1024);
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">

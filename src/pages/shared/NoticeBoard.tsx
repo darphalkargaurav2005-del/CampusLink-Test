@@ -10,6 +10,7 @@ import Modal from "@/components/features/Modal";
 import { MOCK_NOTICES } from "@/constants/mockData";
 import type { Notice } from "@/types";
 import { cn } from "@/lib/utils";
+import { useDeleteConfirm } from "@/contexts/DeleteConfirmContext";
 
 interface Props { role: string; }
 
@@ -40,6 +41,7 @@ export default function NoticeBoard({ role }: Props) {
   const [notices, setNotices] = useState<Notice[]>(MOCK_NOTICES);
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const { confirmDelete } = useDeleteConfirm();
   const isAdmin = role === "admin";
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) });
@@ -114,7 +116,20 @@ export default function NoticeBoard({ role }: Props) {
               {isAdmin && (
                 <div className="flex gap-1 flex-shrink-0">
                   <button onClick={() => toast.info("Edit notice")} className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground transition-colors"><Edit2 size={14} /></button>
-                  <button onClick={() => { setNotices(prev => prev.filter(n => n.id !== notice.id)); toast.success("Notice removed"); }} className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg text-muted-foreground hover:text-rose-600 transition-colors"><Trash2 size={14} /></button>
+                  <button
+                    onClick={() => confirmDelete({
+                      title: "Remove Notice",
+                      itemName: notice.title,
+                      itemType: "Notice",
+                      onConfirm: () => {
+                        setNotices(prev => prev.filter(n => n.id !== notice.id));
+                        toast.success("Notice removed");
+                      }
+                    })}
+                    className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg text-muted-foreground hover:text-rose-600 transition-colors"
+                  >
+                    <Trash2 size={14} />
+                  </button>
                 </div>
               )}
             </div>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CalendarCheck, Save, ChevronDown } from "lucide-react";
+import { CalendarCheck, Save, ChevronDown, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import PageHeader from "@/components/features/PageHeader";
@@ -11,6 +11,7 @@ type AttendanceStatus = "present" | "absent" | "late";
 export default function DigitalAttendance() {
   const [selectedCourse, setSelectedCourse] = useState(MOCK_COURSES[0].id);
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [search, setSearch] = useState("");
   const [attendance, setAttendance] = useState<Record<string, AttendanceStatus>>(
     Object.fromEntries(MOCK_STUDENTS.map(s => [s.id, "present"]))
   );
@@ -30,6 +31,11 @@ export default function DigitalAttendance() {
     setSaved(true);
     toast.success(`Attendance saved — ${presentCount} present, ${absentCount} absent, ${lateCount} late`);
   };
+
+  const filteredStudents = MOCK_STUDENTS.filter(s =>
+    s.name.toLowerCase().includes(search.toLowerCase()) ||
+    s.rollNo.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div>
@@ -78,11 +84,25 @@ export default function DigitalAttendance() {
       </div>
 
       <div className="bg-card border border-border rounded-xl overflow-hidden shadow-card">
-        <div className="p-4 border-b border-border">
+        <div className="p-4 border-b border-border flex items-center justify-between gap-4 flex-wrap">
           <h3 className="font-semibold text-foreground text-sm font-display">{course?.name} — Student List</h3>
+          <div className="relative w-48">
+            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search students..."
+              className="w-full pl-7 pr-7 py-1.5 text-xs bg-muted border-0 focus:outline-none focus:ring-1 focus:ring-ring rounded-lg text-foreground placeholder:text-muted-foreground/60"
+            />
+            {search && (
+              <button onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                <X size={12} />
+              </button>
+            )}
+          </div>
         </div>
         <div className="divide-y divide-border">
-          {MOCK_STUDENTS.map((student, idx) => (
+          {filteredStudents.map((student, idx) => (
             <motion.div
               key={student.id}
               initial={{ opacity: 0 }}

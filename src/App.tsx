@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { DeleteConfirmProvider } from "@/contexts/DeleteConfirmContext";
 
 // Auth Pages
 import LoginPage from "@/pages/auth/LoginPage";
@@ -25,6 +26,7 @@ import ReportsAnalytics from "@/pages/admin/ReportsAnalytics";
 import AdminChats from "@/pages/shared/Chats";
 import AdminSettings from "@/pages/shared/Settings";
 import AIAssistant from "@/pages/shared/AIAssistant";
+import HistoryPage from "@/pages/shared/History";
 
 // Teacher Pages
 import TeacherLayout from "@/components/layout/TeacherLayout";
@@ -104,6 +106,7 @@ function AppRoutes() {
         <Route path="ai" element={<AIAssistant role="admin" />} />
         <Route path="chats" element={<AdminChats />} />
         <Route path="settings" element={<AdminSettings />} />
+        <Route path="history" element={<HistoryPage />} />
       </Route>
 
       {/* Teacher Routes */}
@@ -121,6 +124,7 @@ function AppRoutes() {
         <Route path="ai" element={<AIAssistant role="teacher" />} />
         <Route path="chats" element={<AdminChats />} />
         <Route path="settings" element={<AdminSettings />} />
+        <Route path="history" element={<HistoryPage />} />
       </Route>
 
       {/* Student Routes */}
@@ -138,6 +142,7 @@ function AppRoutes() {
         <Route path="ai" element={<AIAssistant role="student" />} />
         <Route path="chats" element={<AdminChats />} />
         <Route path="settings" element={<AdminSettings />} />
+        <Route path="history" element={<HistoryPage />} />
       </Route>
 
       {/* Parent Routes */}
@@ -153,6 +158,7 @@ function AppRoutes() {
         <Route path="chats" element={<AdminChats />} />
         <Route path="ai" element={<AIAssistant role="parent" />} />
         <Route path="settings" element={<AdminSettings />} />
+        <Route path="history" element={<HistoryPage />} />
       </Route>
 
       {/* Librarian Routes */}
@@ -170,6 +176,7 @@ function AppRoutes() {
         <Route path="reports" element={<LibraryReports />} />
         <Route path="ai" element={<AIAssistant role="librarian" />} />
         <Route path="settings" element={<AdminSettings />} />
+        <Route path="history" element={<HistoryPage />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />
@@ -182,8 +189,10 @@ export default function App() {
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
-          <AppRoutes />
-          <Toaster richColors position="top-right" />
+          <DeleteConfirmProvider>
+            <AppRoutes />
+            <Toaster richColors position="top-right" />
+          </DeleteConfirmProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>

@@ -28,6 +28,7 @@ export default function Chats() {
   const [selectedContact, setSelectedContact] = useState(CONTACTS[0]);
   const [messages, setMessages] = useState<Message[]>(MOCK_MESSAGES);
   const [input, setInput] = useState("");
+  const [search, setSearch] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -56,6 +57,11 @@ export default function Chats() {
     setInput("");
   };
 
+  const filteredContacts = CONTACTS.filter(contact =>
+    contact.name.toLowerCase().includes(search.toLowerCase()) ||
+    contact.role.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div>
       <PageHeader title="Chats" subtitle="Direct messaging with staff and students" />
@@ -66,11 +72,16 @@ export default function Chats() {
           <div className="p-3 border-b border-border">
             <div className="relative">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input placeholder="Search..." className="w-full pl-8 pr-3 py-2 text-sm bg-muted rounded-lg border-0 focus:outline-none" />
+              <input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search..."
+                className="w-full pl-8 pr-3 py-2 text-sm bg-muted rounded-lg border-0 focus:outline-none"
+              />
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
-            {CONTACTS.map(contact => (
+            {filteredContacts.map(contact => (
               <button
                 key={contact.id}
                 onClick={() => setSelectedContact(contact)}

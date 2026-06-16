@@ -2,12 +2,13 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Upload, FileText, File, Presentation, Trash2, Download, Eye } from "lucide-react";
-import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { Upload, FileText, File, Presentation, Trash2, Download, Eye, Search, X } from "lucide-react";
+import { toast } from "sonner";
 import PageHeader from "@/components/features/PageHeader";
 import Modal from "@/components/features/Modal";
 import { cn } from "@/lib/utils";
+import { useDeleteConfirm } from "@/contexts/DeleteConfirmContext";
 
 const schema = z.object({
   title: z.string().min(3, "Title required"),
@@ -16,9 +17,20 @@ const schema = z.object({
   type: z.string().min(1, "Type required"),
 });
 
+interface MaterialItem {
+  id: string;
+  title: string;
+  type: string;
+  course: string;
+  size: string;
+  date: string;
+  downloads: number;
+  description?: string;
+}
+
 type FormData = z.infer<typeof schema>;
 
-const INITIAL_MATERIALS = [
+const INITIAL_MATERIALS: MaterialItem[] = [
   { id: "m1", title: "Lecture 5: Binary Search Trees", type: "Notes", course: "Data Structures", size: "2.3 MB", date: "2024-02-20", downloads: 45 },
   { id: "m2", title: "Week 3: SQL Joins and Subqueries", type: "Notes", course: "DBMS", size: "1.8 MB", date: "2024-02-18", downloads: 38 },
   { id: "m3", title: "Chapter 7: Integration Techniques", type: "PDF", course: "Engineering Math", size: "4.2 MB", date: "2024-02-15", downloads: 92 },
@@ -39,16 +51,31 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 export default function StudyMaterial() {
-  const [materials, setMaterials] = useState(INITIAL_MATERIALS);
+  const [materials, setMaterials] = useState<MaterialItem[]>(INITIAL_MATERIALS);
   const [modalOpen, setModalOpen] = useState(false);
   const [filter, setFilter] = useState("All");
+  const [search, setSearch] = useState("");
+  const { confirmDelete } = useDeleteConfirm();
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) });
 
-  const filtered = filter === "All" ? materials : materials.filter(m => m.type === filter);
+  const filtered = materials.filter(m => {
+    const matchesFilter = filter === "All" || m.type === filter;
+    const matchesSearch = m.title.toLowerCase().includes(search.toLowerCase()) || m.course.toLowerCase().includes(search.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
 
   const onSubmit = (data: FormData) => {
-    const newMaterial = { id: `m${Date.now()}`, ...data, size: "1.0 MB", date: new Date().toISOString().split("T")[0], downloads: 0 };
+    const newMaterial: MaterialItem = {
+      id: `m${Date.now()}`,
+      title: data.title,
+      type: data.type,
+      course: data.course,
+      description: data.description,
+      size: "1.0 MB",
+      date: new Date().toISOString().split("T")[0],
+      downloads: 0,
+    };
     setMaterials(prev => [newMaterial, ...prev]);
     toast.success("Study material uploaded successfully");
     setModalOpen(false);
@@ -67,12 +94,28 @@ export default function StudyMaterial() {
         }
       />
 
-      <div className="flex gap-2 mb-5">
-        {["All", "Notes", "PDF", "PPT"].map(f => (
-          <button key={f} onClick={() => setFilter(f)} className={cn("px-4 py-2 text-xs font-medium rounded-xl border transition-colors", filter === f ? "gradient-brand text-white border-transparent" : "border-border hover:bg-muted")}>
-            {f}
-          </button>
-        ))}
+      <div className="flex flex-wrap gap-3 mb-5">
+        <div className="relative flex-1 min-w-[200px] max-w-sm">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search materials..."
+            className="w-full pl-9 pr-9 py-2.5 text-sm bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          {search && (
+            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+              <X size={14} />
+            </button>
+          )}
+        </div>
+        <div className="flex gap-2">
+          {["All", "Notes", "PDF", "PPT"].map(f => (
+            <button key={f} onClick={() => setFilter(f)} className={cn("px-4 py-2.5 text-xs font-medium rounded-xl border transition-colors", filter === f ? "gradient-brand text-white border-transparent" : "border-border hover:bg-muted")}>
+              {f}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -108,7 +151,18 @@ export default function StudyMaterial() {
                 <button onClick={() => toast.success("Downloaded")} className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs border border-border rounded-lg hover:bg-muted transition-colors">
                   <Download size={13} /> Download
                 </button>
-                <button onClick={() => { setMaterials(prev => prev.filter(m => m.id !== mat.id)); toast.success("Material removed"); }} className="p-2 border border-rose-200 dark:border-rose-900 text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors">
+                <button
+                  onClick={() => confirmDelete({
+                    title: "Remove Study Material",
+                    itemName: mat.title,
+                    itemType: "Study Material",
+                    onConfirm: () => {
+                      setMaterials(prev => prev.filter(m => m.id !== mat.id));
+                      toast.success("Material removed");
+                    }
+                  })}
+                  className="p-2 border border-rose-200 dark:border-rose-900 text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                >
                   <Trash2 size={13} />
                 </button>
               </div>

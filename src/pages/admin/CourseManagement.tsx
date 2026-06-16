@@ -10,6 +10,7 @@ import Modal from "@/components/features/Modal";
 import { MOCK_COURSES } from "@/constants/mockData";
 import type { Course } from "@/types";
 import { cn } from "@/lib/utils";
+import { useDeleteConfirm } from "@/contexts/DeleteConfirmContext";
 
 const schema = z.object({
   name: z.string().min(2, "Course name required"),
@@ -27,6 +28,7 @@ export default function CourseManagement() {
   const [courses, setCourses] = useState<Course[]>(MOCK_COURSES);
   const [modalOpen, setModalOpen] = useState(false);
   const [editCourse, setEditCourse] = useState<Course | null>(null);
+  const { confirmDelete } = useDeleteConfirm();
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) });
 
@@ -111,7 +113,20 @@ export default function CourseManagement() {
                   <td>
                     <div className="flex gap-1">
                       <button onClick={() => openEdit(course)} className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground transition-colors"><Edit2 size={14} /></button>
-                      <button onClick={() => { setCourses(prev => prev.filter(c => c.id !== course.id)); toast.success("Course removed"); }} className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg text-muted-foreground hover:text-rose-600 transition-colors"><Trash2 size={14} /></button>
+                      <button
+                        onClick={() => confirmDelete({
+                          title: "Remove Course",
+                          itemName: course.name,
+                          itemType: "Course",
+                          onConfirm: () => {
+                            setCourses(prev => prev.filter(c => c.id !== course.id));
+                            toast.success("Course removed");
+                          }
+                        })}
+                        className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg text-muted-foreground hover:text-rose-600 transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
                   </td>
                 </motion.tr>

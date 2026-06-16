@@ -3,6 +3,7 @@ import { Search, Edit2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import PageHeader from "@/components/features/PageHeader";
+import { useDeleteConfirm } from "@/contexts/DeleteConfirmContext";
 
 const INITIAL_USERS = [
   { id: "u1", name: "Dr. Pradeep Srivastava", email: "admin@campus.edu", role: "Institute Admin", status: "Active", lastLogin: "2024-02-28", department: "Administration" },
@@ -23,6 +24,7 @@ const roleColors: Record<string, string> = {
 export default function UserManagement() {
   const [users, setUsers] = useState(INITIAL_USERS);
   const [search, setSearch] = useState("");
+  const { confirmDelete } = useDeleteConfirm();
 
   const filtered = users.filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase()) || u.role.toLowerCase().includes(search.toLowerCase()));
 
@@ -75,7 +77,20 @@ export default function UserManagement() {
                   <td>
                     <div className="flex gap-1">
                       <button onClick={() => toast.info(`Editing ${user.name}`)} className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground transition-colors"><Edit2 size={14} /></button>
-                      <button onClick={() => { setUsers(prev => prev.filter(u => u.id !== user.id)); toast.success("User removed"); }} className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg text-muted-foreground hover:text-rose-600 transition-colors"><Trash2 size={14} /></button>
+                      <button
+                        onClick={() => confirmDelete({
+                          title: "Remove User",
+                          itemName: user.name,
+                          itemType: "User",
+                          onConfirm: () => {
+                            setUsers(prev => prev.filter(u => u.id !== user.id));
+                            toast.success("User removed");
+                          }
+                        })}
+                        className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg text-muted-foreground hover:text-rose-600 transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
                   </td>
                 </motion.tr>
