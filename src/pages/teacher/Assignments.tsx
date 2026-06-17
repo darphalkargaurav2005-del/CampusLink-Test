@@ -25,24 +25,47 @@ type FormData = z.infer<typeof schema>;
 export default function Assignments() {
   const [assignments, setAssignments] = useState<Assignment[]>(MOCK_ASSIGNMENTS);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
   const { confirmDelete } = useDeleteConfirm();
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) });
 
+  const handleEdit = (assignment: Assignment) => {
+    setEditingAssignment(assignment);
+    reset({
+      title: assignment.title,
+      description: assignment.description,
+      courseName: assignment.courseName,
+      dueDate: assignment.dueDate,
+      maxMarks: String(assignment.maxMarks),
+    });
+    setModalOpen(true);
+  };
+
   const onSubmit = (data: FormData) => {
-    const newA: Assignment = {
-      id: `a${Date.now()}`,
-      ...data,
-      maxMarks: Number(data.maxMarks),
-      courseId: "c1",
-      teacherId: "t1",
-      submittedCount: 0,
-      totalStudents: 65,
-      status: "active",
-    };
-    setAssignments(prev => [newA, ...prev]);
-    toast.success("Assignment created and published");
+    if (editingAssignment) {
+      setAssignments(prev => prev.map(a => a.id === editingAssignment.id ? {
+        ...a,
+        ...data,
+        maxMarks: Number(data.maxMarks),
+      } : a));
+      toast.success("Assignment updated successfully");
+    } else {
+      const newA: Assignment = {
+        id: `a${Date.now()}`,
+        ...data,
+        maxMarks: Number(data.maxMarks),
+        courseId: "c1",
+        teacherId: "t1",
+        submittedCount: 0,
+        totalStudents: 65,
+        status: "active",
+      };
+      setAssignments(prev => [newA, ...prev]);
+      toast.success("Assignment created and published");
+    }
     setModalOpen(false);
+    setEditingAssignment(null);
     reset();
   };
 
@@ -58,7 +81,7 @@ export default function Assignments() {
         title="Assignments"
         subtitle={`Managing ${assignments.length} assignments`}
         action={
-          <button onClick={() => { reset(); setModalOpen(true); }} className="flex items-center gap-2 px-4 py-2.5 rounded-xl gradient-brand text-white text-sm font-semibold hover:opacity-90">
+          <button onClick={() => { setEditingAssignment(null); reset({ title: "", description: "", courseName: "", dueDate: "", maxMarks: "" }); setModalOpen(true); }} className="flex items-center gap-2 px-4 py-2.5 rounded-xl gradient-brand text-white text-sm font-semibold hover:opacity-90">
             <Plus size={16} /> Create Assignment
           </button>
         }
@@ -85,7 +108,7 @@ export default function Assignments() {
                   <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{a.description}</p>
                 </div>
                 <div className="flex gap-1 flex-shrink-0">
-                  <button onClick={() => toast.info("Edit assignment")} className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground transition-colors"><Edit2 size={14} /></button>
+                  <button onClick={() => handleEdit(a)} className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground transition-colors"><Edit2 size={14} /></button>
                   <button
                     onClick={() => confirmDelete({
                       title: "Remove Assignment",
@@ -122,11 +145,11 @@ export default function Assignments() {
         })}
       </div>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Create Assignment" size="lg"
+      <Modal open={modalOpen} onClose={() => { setModalOpen(false); setEditingAssignment(null); reset(); }} title={editingAssignment ? "Edit Assignment" : "Create Assignment"} size="lg"
         footer={
           <>
-            <button onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm border border-border rounded-xl hover:bg-muted transition-colors">Cancel</button>
-            <button onClick={handleSubmit(onSubmit)} className="px-4 py-2 text-sm gradient-brand text-white rounded-xl font-semibold">Publish Assignment</button>
+            <button onClick={() => { setModalOpen(false); setEditingAssignment(null); reset(); }} className="px-4 py-2 text-sm border border-border rounded-xl hover:bg-muted transition-colors">Cancel</button>
+            <button onClick={handleSubmit(onSubmit)} className="px-4 py-2 text-sm gradient-brand text-white rounded-xl font-semibold">{editingAssignment ? "Save Changes" : "Publish Assignment"}</button>
           </>
         }
       >

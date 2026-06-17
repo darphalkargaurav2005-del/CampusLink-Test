@@ -37,7 +37,7 @@ const TABS = [
 ];
 
 export default function Settings() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { theme, setTheme } = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "profile";
@@ -51,7 +51,10 @@ export default function Settings() {
 
   const passwordForm = useForm<PasswordData>({ resolver: zodResolver(passwordSchema) });
 
-  const onProfileSave = (data: ProfileData) => { toast.success("Profile updated successfully"); };
+  const onProfileSave = (data: ProfileData) => {
+    updateUser(data);
+    toast.success("Profile updated successfully");
+  };
   const onPasswordSave = (data: PasswordData) => { toast.success("Password changed successfully"); passwordForm.reset(); };
 
   return (
@@ -85,13 +88,40 @@ export default function Settings() {
               <div>
                 <h2 className="font-semibold text-foreground text-base mb-5 font-display">Profile Information</h2>
                 <div className="flex items-center gap-4 mb-6 pb-6 border-b border-border">
-                  <div className="w-16 h-16 rounded-2xl gradient-brand flex items-center justify-center text-white font-bold text-2xl">
-                    {user?.name.charAt(0)}
+                  <div className="w-16 h-16 rounded-2xl gradient-brand flex items-center justify-center text-white font-bold text-2xl overflow-hidden">
+                    {user?.avatar ? (
+                      <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                    ) : (
+                      user?.name.charAt(0)
+                    )}
                   </div>
                   <div>
                     <p className="font-semibold text-foreground">{user?.name}</p>
                     <p className="text-sm text-muted-foreground capitalize">{user?.role}</p>
-                    <button onClick={() => toast.info("Change avatar coming soon")} className="text-xs text-primary hover:underline mt-1">Change avatar</button>
+                    <input
+                      type="file"
+                      id="avatar-upload"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            updateUser({ avatar: reader.result as string });
+                            toast.success("Avatar updated successfully");
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById("avatar-upload")?.click()}
+                      className="text-xs text-primary hover:underline mt-1"
+                    >
+                      Change avatar
+                    </button>
                   </div>
                 </div>
                 <form onSubmit={profileForm.handleSubmit(onProfileSave)} className="space-y-4">

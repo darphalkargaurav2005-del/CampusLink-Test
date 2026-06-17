@@ -3,15 +3,10 @@ import { Search, Edit2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import PageHeader from "@/components/features/PageHeader";
+import Modal from "@/components/features/Modal";
 import { useDeleteConfirm } from "@/contexts/DeleteConfirmContext";
-
-const INITIAL_USERS = [
-  { id: "u1", name: "Dr. Pradeep Srivastava", email: "admin@campus.edu", role: "Institute Admin", status: "Active", lastLogin: "2024-02-28", department: "Administration" },
-  { id: "u2", name: "Dr. Anand Kumar", email: "teacher@campus.edu", role: "Teacher", status: "Active", lastLogin: "2024-02-28", department: "Computer Science" },
-  { id: "u3", name: "Aisha Sharma", email: "student@campus.edu", role: "Student", status: "Active", lastLogin: "2024-02-27", department: "Computer Science" },
-  { id: "u4", name: "Rajesh Sharma", email: "parent@campus.edu", role: "Parent", status: "Active", lastLogin: "2024-02-25", department: "-" },
-  { id: "u5", name: "Mrs. Kavitha Menon", email: "librarian@campus.edu", role: "Librarian", status: "Active", lastLogin: "2024-02-28", department: "Library" },
-];
+import { store } from "@/lib/store";
+import { useAuth } from "@/contexts/AuthContext";
 
 const roleColors: Record<string, string> = {
   "Institute Admin": "badge-primary",
@@ -22,11 +17,107 @@ const roleColors: Record<string, string> = {
 };
 
 export default function UserManagement() {
-  const [users, setUsers] = useState(INITIAL_USERS);
+  const [users, setUsers] = useState(() => store.users);
   const [search, setSearch] = useState("");
   const { confirmDelete } = useDeleteConfirm();
+  const { user: loggedInUser } = useAuth();
+
+  // Modal State
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
+
+  // Form State
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("Student");
+  const [department, setDepartment] = useState("");
+  const [status, setStatus] = useState("Active");
 
   const filtered = users.filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase()) || u.role.toLowerCase().includes(search.toLowerCase()));
+
+  const handleOpenAdd = () => {
+    setEditingUser(null);
+    setName("");
+    setEmail("");
+    setRole("Student");
+    setDepartment("");
+    setStatus("Active");
+    setModalOpen(true);
+  };
+
+  const handleOpenEdit = (user: any) => {
+    setEditingUser(user);
+    setName(user.name);
+    setEmail(user.email);
+    setRole(user.role);
+    setDepartment(user.department === "-" ? "" : user.department);
+    setStatus(user.status);
+    setModalOpen(true);
+  };
+
+  const handleSaveUser = () => {
+    if (!name.trim() || !email.trim()) {
+      toast.error("Name and Email are required");
+      return;
+    }
+
+    if (editingUser) {
+      // Edit mode
+      const updatedUsers = users.map(u => {
+        if (u.id === editingUser.id) {
+          return {
+            ...u,
+            name,
+            email,
+            role,
+            department: department.trim() || "-",
+            status
+          };
+        }
+        return u;
+      });
+      store.users = updatedUsers;
+      setUsers(updatedUsers);
+
+      store.addHistory({
+        action: "edited",
+        itemType: "User",
+        itemName: name,
+        timestamp: new Date().toLocaleString("en-IN"),
+        performedBy: loggedInUser ? `${loggedInUser.name} (${loggedInUser.role})` : "System",
+        details: `Updated info for user ${editingUser.name}`,
+      });
+
+      toast.success("User updated successfully");
+    } else {
+      // Add mode
+      const newUser = {
+        id: "u" + Date.now(),
+        name,
+        email,
+        role,
+        department: department.trim() || "-",
+        status,
+        lastLogin: "Never"
+      };
+      const updatedUsers = [...users, newUser];
+      store.users = updatedUsers;
+      setUsers(updatedUsers);
+
+      store.addHistory({
+        action: "added",
+        itemType: "User",
+        itemName: name,
+        timestamp: new Date().toLocaleString("en-IN"),
+        performedBy: loggedInUser ? `${loggedInUser.name} (${loggedInUser.role})` : "System",
+        details: `Role: ${role}, Email: ${email}`,
+      });
+
+      toast.success("New user invited successfully");
+    }
+
+    setModalOpen(false);
+  };
 
   return (
     <div>
@@ -34,7 +125,7 @@ export default function UserManagement() {
         title="User Management"
         subtitle="Manage all system users and their access levels"
         action={
-          <button onClick={() => toast.info("New user invitation sent")} className="flex items-center gap-2 px-4 py-2.5 rounded-xl gradient-brand text-white text-sm font-semibold hover:opacity-90">
+          <button onClick={handleOpenAdd} className="flex items-center gap-2 px-4 py-2.5 rounded-xl gradient-brand text-white text-sm font-semibold hover:opacity-90">
             + Invite User
           </button>
         }
@@ -76,14 +167,16 @@ export default function UserManagement() {
                   <td className="text-xs text-muted-foreground">{user.lastLogin}</td>
                   <td>
                     <div className="flex gap-1">
-                      <button onClick={() => toast.info(`Editing ${user.name}`)} className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground transition-colors"><Edit2 size={14} /></button>
+                      <button onClick={() => handleOpenEdit(user)} className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground transition-colors"><Edit2 size={14} /></button>
                       <button
                         onClick={() => confirmDelete({
                           title: "Remove User",
                           itemName: user.name,
                           itemType: "User",
                           onConfirm: () => {
-                            setUsers(prev => prev.filter(u => u.id !== user.id));
+                            const updated = users.filter(u => u.id !== user.id);
+                            store.users = updated;
+                            setUsers(updated);
                             toast.success("User removed");
                           }
                         })}
@@ -99,6 +192,104 @@ export default function UserManagement() {
           </table>
         </div>
       </div>
+
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={editingUser ? "Edit User" : "Invite New User"}
+        subtitle={editingUser ? "Modify user details and roles" : "Send an invitation to a new system user"}
+        size="md"
+        footer={
+          <>
+            <button
+              onClick={() => setModalOpen(false)}
+              className="px-4 py-2 text-sm border border-border rounded-xl hover:bg-muted transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSaveUser}
+              className="px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition-colors"
+            >
+              {editingUser ? "Save Changes" : "Invite User"}
+            </button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-foreground mb-1.5 uppercase tracking-wider">
+              Full Name
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Dr. Pradeep Srivastava"
+              className="w-full px-3 py-2 text-sm bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-foreground mb-1.5 uppercase tracking-wider">
+              Email Address
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="e.g. user@campus.edu"
+              className="w-full px-3 py-2 text-sm bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring"
+              required
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-foreground mb-1.5 uppercase tracking-wider">
+                Role
+              </label>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full px-3 py-2 text-sm bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring select-none"
+              >
+                <option value="Institute Admin">Institute Admin</option>
+                <option value="Teacher">Teacher</option>
+                <option value="Student">Student</option>
+                <option value="Parent">Parent</option>
+                <option value="Librarian">Librarian</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-foreground mb-1.5 uppercase tracking-wider">
+                Department
+              </label>
+              <input
+                type="text"
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                placeholder="e.g. Computer Science"
+                className="w-full px-3 py-2 text-sm bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+          </div>
+          {editingUser && (
+            <div>
+              <label className="block text-xs font-semibold text-foreground mb-1.5 uppercase tracking-wider">
+                Status
+              </label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full px-3 py-2 text-sm bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 }

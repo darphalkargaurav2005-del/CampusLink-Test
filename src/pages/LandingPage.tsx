@@ -3,15 +3,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import {
   Shield, GraduationCap, Users, BookOpen, BarChart3, Bell, MessageSquare,
-  CheckCircle2, ArrowRight, Star, Sun, Moon, Menu, X,
+  CheckCircle2, ArrowRight, ArrowLeft, Star, Sun, Moon, Menu, X,
   Globe, TrendingUp, Calendar, Award, BookMarked, UserCheck,
   Layers, Sparkles, Play, ChevronDown, Building2, BookUser,
   DollarSign, Phone, Mail, FileText, HelpCircle, Briefcase,
   Info, Lock, FileTerminal, Cpu, Newspaper, Compass, Users2
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import heroCampus from "@/assets/hero-campus.jpg";
+import heroCampus from "@/assets/hero-campus.png";
 import Modal from "@/components/features/Modal";
 
 /* ─── NAV DATA ─────────────────────────────────────────── */
@@ -160,11 +161,13 @@ function NavDropdown({
 /* ─── MAIN COMPONENT ──────────────────────────────────── */
 export default function LandingPage() {
   const { theme, toggleTheme } = useTheme();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activePortal, setActivePortal] = useState(0);
   const [scrolled, setScrolled] = useState(false);
-  const [activeModal, setActiveModal] = useState<"blog" | "faq" | "career" | "tutors" | "courses" | null>(null);
+  const [activeModal, setActiveModal] = useState<"blog" | "faq" | "career" | "tutors" | "courses" | "community" | "scholarships" | "contact" | "privacy" | "terms" | null>(null);
+  const [selectedArticle, setSelectedArticle] = useState<any | null>(null);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 60);
@@ -188,7 +191,7 @@ export default function LandingPage() {
               <div className="w-9 h-9 rounded-xl gradient-brand flex items-center justify-center shadow-sm">
                 <Shield size={18} className="text-white" />
               </div>
-              <span className={cn("font-bold text-lg font-display transition-colors", (scrolled || mobileMenuOpen) ? "text-foreground" : "text-white")}>
+              <span className={cn("font-bold text-lg font-display transition-colors", (scrolled || mobileMenuOpen) ? "text-foreground" : "text-slate-900 dark:text-white")}>
                 CampusLink
               </span>
             </Link>
@@ -196,7 +199,7 @@ export default function LandingPage() {
             {/* Desktop Nav */}
             <div className="hidden lg:flex items-center gap-0.5">
               {/* Platform dropdown */}
-              <div className={cn("transition-colors", !(scrolled || mobileMenuOpen) && "[&_button]:text-white/80 [&_button:hover]:text-white [&_button:hover]:bg-white/10")}>
+              <div className={cn("transition-colors", !(scrolled || mobileMenuOpen) && "[&_button]:text-slate-700 dark:[&_button]:text-white/80 [&_button:hover]:text-slate-900 dark:[&_button:hover]:text-white [&_button:hover]:bg-slate-900/5 dark:[&_button:hover]:bg-white/10")}>
                 <NavDropdown label="Platform" items={PLATFORM_ITEMS} />
               </div>
 
@@ -210,7 +213,7 @@ export default function LandingPage() {
                         "px-3 py-2 text-sm font-medium rounded-lg transition-all",
                         (scrolled || mobileMenuOpen)
                           ? "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                          : "text-white/80 hover:text-white hover:bg-white/10"
+                          : "text-slate-700 dark:text-white/80 hover:text-slate-900 dark:hover:text-white hover:bg-slate-900/5 dark:hover:bg-white/10"
                       )}
                     >
                       {label}
@@ -226,7 +229,7 @@ export default function LandingPage() {
                       "px-3 py-2 text-sm font-medium rounded-lg transition-all text-left",
                       (scrolled || mobileMenuOpen)
                         ? "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                        : "text-white/80 hover:text-white hover:bg-white/10"
+                        : "text-slate-700 dark:text-white/80 hover:text-slate-900 dark:hover:text-white hover:bg-slate-900/5 dark:hover:bg-white/10"
                     )}
                   >
                     {label}
@@ -235,7 +238,7 @@ export default function LandingPage() {
               })}
 
               {/* Resources dropdown */}
-              <div className={cn("transition-colors", !(scrolled || mobileMenuOpen) && "[&_button]:text-white/80 [&_button:hover]:text-white [&_button:hover]:bg-white/10")}>
+              <div className={cn("transition-colors", !(scrolled || mobileMenuOpen) && "[&_button]:text-slate-700 dark:[&_button]:text-white/80 [&_button:hover]:text-slate-900 dark:[&_button:hover]:text-white [&_button:hover]:bg-slate-900/5 dark:[&_button:hover]:bg-white/10")}>
                 <NavDropdown label="Resources" items={RESOURCES_ITEMS} onItemClick={(key) => setActiveModal(key as any)} />
               </div>
 
@@ -245,7 +248,7 @@ export default function LandingPage() {
                   "px-3 py-2 text-sm font-medium rounded-lg transition-all",
                   (scrolled || mobileMenuOpen)
                     ? "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                    : "text-white/80 hover:text-white hover:bg-white/10"
+                    : "text-slate-700 dark:text-white/80 hover:text-slate-900 dark:hover:text-white hover:bg-slate-900/5 dark:hover:bg-white/10"
                 )}
               >
                 About
@@ -259,28 +262,39 @@ export default function LandingPage() {
                   "p-2.5 rounded-xl border transition-colors",
                   (scrolled || mobileMenuOpen)
                     ? "border-border hover:bg-muted text-muted-foreground"
-                    : "border-white/20 hover:bg-white/10 text-white/80"
+                    : "border-slate-200 dark:border-white/20 hover:bg-slate-900/5 dark:hover:bg-white/10 text-slate-700 dark:text-white/80"
                 )}
               >
                 {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
               </button>
-              <Link
-                to="/register"
-                className={cn(
-                  "px-4 py-2 text-sm font-semibold rounded-xl border transition-all",
-                  (scrolled || mobileMenuOpen)
-                    ? "border-border text-foreground hover:bg-muted"
-                    : "border-white/30 text-white hover:bg-white/10"
-                )}
-              >
-                Register
-              </Link>
-              <Link
-                to="/login"
-                className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold gradient-brand text-white rounded-xl hover:opacity-90 transition-opacity shadow-sm"
-              >
-                Sign In <ArrowRight size={14} />
-              </Link>
+              {user ? (
+                <Link
+                  to={`/${user.role}/dashboard`}
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold gradient-brand text-white rounded-xl hover:opacity-90 transition-opacity shadow-sm"
+                >
+                  Dashboard <ArrowRight size={14} />
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/register"
+                    className={cn(
+                      "px-4 py-2 text-sm font-semibold rounded-xl border transition-all",
+                      (scrolled || mobileMenuOpen)
+                        ? "border-border text-foreground hover:bg-muted"
+                        : "border-slate-300 dark:border-white/30 text-slate-700 dark:text-white hover:bg-slate-900/5 dark:hover:bg-white/10"
+                    )}
+                  >
+                    Register
+                  </Link>
+                  <Link
+                    to="/login"
+                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold gradient-brand text-white rounded-xl hover:opacity-90 transition-opacity shadow-sm"
+                  >
+                    Sign In <ArrowRight size={14} />
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile toggle */}
@@ -290,7 +304,7 @@ export default function LandingPage() {
                 "lg:hidden p-2.5 rounded-xl border transition-colors",
                 (scrolled || mobileMenuOpen)
                   ? "border-border hover:bg-muted text-foreground"
-                  : "border-white/20 hover:bg-white/10 text-white"
+                  : "border-slate-200 dark:border-white/20 hover:bg-slate-900/5 dark:hover:bg-white/10 text-slate-700 dark:text-white"
               )}
             >
               {mobileMenuOpen
@@ -348,14 +362,23 @@ export default function LandingPage() {
                 ))}
                 <div className="border-t border-border my-2" />
                 <div className="flex gap-2 pt-1">
-                  <Link to="/register" onClick={() => setMobileMenuOpen(false)}
-                    className="flex-1 text-center py-2.5 border border-border rounded-xl text-sm font-semibold text-foreground hover:bg-muted transition-colors">
-                    Register
-                  </Link>
-                  <Link to="/login" onClick={() => setMobileMenuOpen(false)}
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 gradient-brand text-white rounded-xl text-sm font-semibold">
-                    Sign In <ArrowRight size={14} />
-                  </Link>
+                  {user ? (
+                    <Link to={`/${user.role}/dashboard`} onClick={() => setMobileMenuOpen(false)}
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 gradient-brand text-white rounded-xl text-sm font-semibold">
+                      Go to Dashboard <ArrowRight size={14} />
+                    </Link>
+                  ) : (
+                    <>
+                      <Link to="/register" onClick={() => setMobileMenuOpen(false)}
+                        className="flex-1 text-center py-2.5 border border-border rounded-xl text-sm font-semibold text-foreground hover:bg-muted transition-colors">
+                        Register
+                      </Link>
+                      <Link to="/login" onClick={() => setMobileMenuOpen(false)}
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 gradient-brand text-white rounded-xl text-sm font-semibold">
+                        Sign In <ArrowRight size={14} />
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -364,11 +387,11 @@ export default function LandingPage() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
+      <section className="relative min-h-screen flex items-center pt-16 overflow-hidden bg-background">
         <div className="absolute inset-0">
           <img src={heroCampus} alt="Campus" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-950/96 via-indigo-950/85 to-slate-900/70" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-50/90 via-indigo-50/75 to-slate-100/60 dark:from-slate-950/96 dark:via-indigo-950/85 dark:to-slate-900/70 transition-all duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent transition-all duration-300" />
         </div>
         {/* Grid pattern */}
         <div className="absolute inset-0 opacity-[0.035]" style={{
@@ -384,16 +407,16 @@ export default function LandingPage() {
             {/* Left — text */}
             <div className="lg:col-span-12 text-center flex flex-col items-center justify-center max-w-3xl mx-auto w-full">
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                className="inline-flex items-center gap-2 bg-white/8 backdrop-blur-sm border border-white/15 rounded-full px-4 py-1.5 mb-7">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-white/85 text-xs font-bold uppercase tracking-widest">Next-Gen College ERP Platform</span>
+                className="inline-flex items-center gap-2 bg-slate-200/50 dark:bg-white/8 backdrop-blur-sm border border-slate-300 dark:border-white/15 rounded-full px-4 py-1.5 mb-7 transition-colors">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
+                <span className="text-slate-800 dark:text-white/85 text-xs font-bold uppercase tracking-widest">Next-Gen College ERP Platform</span>
               </motion.div>
 
               <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
-                className="text-5xl xl:text-6xl 2xl:text-7xl font-bold text-white font-display leading-[1.04] mb-6 text-center">
+                className="text-5xl xl:text-6xl 2xl:text-7xl font-bold text-slate-900 dark:text-white font-display leading-[1.04] mb-6 text-center transition-colors">
                 Smarter College
                 <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-violet-300 to-purple-300">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 dark:from-indigo-300 dark:via-violet-300 dark:to-purple-300">
                   Management
                 </span>
                 <br />
@@ -401,28 +424,28 @@ export default function LandingPage() {
               </motion.h1>
 
               <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                className="text-white/65 text-lg leading-relaxed mb-8 max-w-2xl mx-auto text-center">
+                className="text-slate-650 dark:text-white/65 text-lg leading-relaxed mb-8 max-w-2xl mx-auto text-center transition-colors">
                 CampusLink unifies your entire institution — students, teachers, parents, and administration — on one powerful, intelligent platform.
               </motion.p>
 
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.42 }}
                 className="flex flex-wrap items-center justify-center gap-3 mb-9">
-                <Link to="/register"
+                <Link to={user ? `/${user.role}/dashboard` : "/register"}
                   className="flex items-center gap-2 px-7 py-3.5 gradient-brand text-white font-bold rounded-2xl hover:opacity-90 transition-all shadow-xl shadow-indigo-500/30 text-sm">
-                  Get Started Free <ArrowRight size={16} />
+                  {user ? "Go to Dashboard" : "Get Started Free"} <ArrowRight size={16} />
                 </Link>
                 <button
                   onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}
-                  className="flex items-center gap-2 px-7 py-3.5 bg-white/8 backdrop-blur-sm border border-white/20 text-white font-semibold rounded-2xl hover:bg-white/15 transition-all text-sm">
-                  <Play size={14} className="fill-white" /> See Features
+                  className="flex items-center gap-2 px-7 py-3.5 bg-slate-200/50 dark:bg-white/8 backdrop-blur-sm border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white font-semibold rounded-2xl hover:bg-slate-200 dark:hover:bg-white/15 transition-all text-sm">
+                  <Play size={14} className="fill-slate-800 dark:fill-white text-slate-800 dark:text-white" /> See Features
                 </button>
               </motion.div>
 
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}
                 className="flex items-center justify-center gap-5 flex-wrap">
                 {["No Credit Card Required", "GDPR Compliant", "99.9% Uptime SLA"].map((badge, i) => (
-                  <div key={i} className="flex items-center gap-1.5 text-white/55 text-xs">
-                    <CheckCircle2 size={13} className="text-emerald-400 flex-shrink-0" />
+                  <div key={i} className="flex items-center gap-1.5 text-slate-500 dark:text-white/55 text-xs transition-colors">
+                    <CheckCircle2 size={13} className="text-emerald-500 dark:text-emerald-400 flex-shrink-0" />
                     <span>{badge}</span>
                   </div>
                 ))}
@@ -570,14 +593,23 @@ export default function LandingPage() {
               Join hundreds of colleges using CampusLink to streamline operations and elevate student success.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
-              <Link to="/register"
-                className="flex items-center gap-2 px-8 py-4 bg-white text-indigo-700 font-bold rounded-2xl hover:bg-white/90 transition-all shadow-lg text-sm">
-                Start for Free <ArrowRight size={16} />
-              </Link>
-              <Link to="/login"
-                className="flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-2xl hover:bg-white/20 transition-all text-sm">
-                Sign In
-              </Link>
+              {user ? (
+                <Link to={`/${user.role}/dashboard`}
+                  className="flex items-center gap-2 px-8 py-4 bg-white text-indigo-700 font-bold rounded-2xl hover:bg-white/90 transition-all shadow-lg text-sm">
+                  Go to Dashboard <ArrowRight size={16} />
+                </Link>
+              ) : (
+                <>
+                  <Link to="/register"
+                    className="flex items-center gap-2 px-8 py-4 bg-white text-indigo-700 font-bold rounded-2xl hover:bg-white/90 transition-all shadow-lg text-sm">
+                    Start for Free <ArrowRight size={16} />
+                  </Link>
+                  <Link to="/login"
+                    className="flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-2xl hover:bg-white/20 transition-all text-sm">
+                    Sign In
+                  </Link>
+                </>
+              )}
             </div>
           </motion.div>
         </div>
@@ -613,13 +645,33 @@ export default function LandingPage() {
             <div>
               <h4 className="text-sm font-bold text-foreground mb-4 uppercase tracking-wider">Platform</h4>
               <ul className="space-y-2.5">
-                {FOOTER_PLATFORM.map(item => (
-                  <li key={item}>
-                    <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                      {item}
-                    </Link>
-                  </li>
-                ))}
+                {FOOTER_PLATFORM.map(item => {
+                  let href = "/login";
+                  let onClick: any = undefined;
+                  if (item === "Features") {
+                    href = "#features";
+                    onClick = (e: any) => { e.preventDefault(); document.getElementById("features")?.scrollIntoView({ behavior: "smooth" }); };
+                  } else if (item === "Pricing") {
+                    href = "#pricing";
+                    onClick = (e: any) => { e.preventDefault(); document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" }); };
+                  } else {
+                    const roleMap: Record<string, string> = {
+                      "Parents": "parent",
+                      "Students": "student",
+                      "Teachers": "teacher",
+                      "Institute": "admin",
+                      "Librarian": "librarian"
+                    };
+                    href = `/login?role=${roleMap[item] || ""}`;
+                  }
+                  return (
+                    <li key={item}>
+                      <Link to={href} onClick={onClick} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        {item}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 
@@ -627,13 +679,27 @@ export default function LandingPage() {
             <div>
               <h4 className="text-sm font-bold text-foreground mb-4 uppercase tracking-wider">Resources</h4>
               <ul className="space-y-2.5">
-                {FOOTER_RESOURCES.map(item => (
-                  <li key={item}>
-                    <a href="#about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                      {item}
-                    </a>
-                  </li>
-                ))}
+                {FOOTER_RESOURCES.map(item => {
+                  const keyMap: Record<string, string> = {
+                    "Blog": "blog",
+                    "FAQ": "faq",
+                    "Tutors": "tutors",
+                    "Community": "community",
+                    "Scholarships": "scholarships",
+                    "Courses": "courses"
+                  };
+                  const modalKey = keyMap[item];
+                  return (
+                    <li key={item}>
+                      <button
+                        onClick={() => setActiveModal(modalKey as any)}
+                        className="text-sm text-muted-foreground hover:text-foreground transition-colors text-left bg-transparent border-none p-0 cursor-pointer"
+                      >
+                        {item}
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 
@@ -641,13 +707,26 @@ export default function LandingPage() {
             <div>
               <h4 className="text-sm font-bold text-foreground mb-4 uppercase tracking-wider">Company</h4>
               <ul className="space-y-2.5">
-                {FOOTER_COMPANY.map(item => (
-                  <li key={item}>
-                    <a href="#about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                      {item}
-                    </a>
-                  </li>
-                ))}
+                {FOOTER_COMPANY.map(item => {
+                  let onClick: any = undefined;
+                  if (item === "About Us") {
+                    onClick = (e: any) => { e.preventDefault(); document.getElementById("about")?.scrollIntoView({ behavior: "smooth" }); };
+                  } else {
+                    const keyMap: Record<string, string> = {
+                      "Contact": "contact",
+                      "Privacy Policy": "privacy",
+                      "Terms of Service": "terms"
+                    };
+                    onClick = (e: any) => { e.preventDefault(); setActiveModal(keyMap[item] as any); };
+                  }
+                  return (
+                    <li key={item}>
+                      <a href="#about" onClick={onClick} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        {item}
+                      </a>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </div>
@@ -658,9 +737,13 @@ export default function LandingPage() {
               &copy; {new Date().getFullYear()} CampusLink. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
-              <a href="#about" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy</a>
-              <a href="#about" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms</a>
-              <Link to="/login" className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">Sign In</Link>
+              <button onClick={() => setActiveModal("privacy")} className="text-xs text-muted-foreground hover:text-foreground transition-colors bg-transparent border-none p-0 cursor-pointer">Privacy</button>
+              <button onClick={() => setActiveModal("terms")} className="text-xs text-muted-foreground hover:text-foreground transition-colors bg-transparent border-none p-0 cursor-pointer">Terms</button>
+              {user ? (
+                <Link to={`/${user.role}/dashboard`} className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">Dashboard</Link>
+              ) : (
+                <Link to="/login" className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">Sign In</Link>
+              )}
             </div>
           </div>
         </div>
@@ -691,25 +774,51 @@ export default function LandingPage() {
 
       <Modal
         open={activeModal === "blog"}
-        onClose={() => setActiveModal(null)}
-        title="CampusLink Insights Blog"
-        subtitle="Recent news, academic studies, and product updates"
+        onClose={() => { setActiveModal(null); setSelectedArticle(null); }}
+        title={selectedArticle ? selectedArticle.title : "CampusLink Insights Blog"}
+        subtitle={selectedArticle ? `${selectedArticle.date} • By ${selectedArticle.author}` : "Recent news, academic studies, and product updates"}
         size="lg"
       >
-        <div className="space-y-4">
-          {[
-            { title: "AI in Modern Classrooms: The Future of Grading", date: "June 12, 2026", author: "Academic Office", excerpt: "Discover how teachers are using automated intelligence tools to evaluate marks and generate custom question banks using CampusLink AI." },
-            { title: "Connecting Parents with Academic Analytics", date: "May 28, 2026", author: "Liaison Officer", excerpt: "Learn how our live parent portal helps bridge the communication gap between faculty and families, providing live insights on student growth." },
-            { title: "Digital Libraries: Restructuring Campus Knowledge", date: "May 15, 2026", author: "Library Committee", excerpt: "Explore the new librarian dashboard features for real-time returns tracking, automated cataloging, and instant fine collection notifications." }
-          ].map((b, i) => (
-            <div key={i} className="p-4 bg-muted/30 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors">
-              <span className="text-[10px] text-primary font-medium">{b.date} • By {b.author}</span>
-              <h4 className="font-bold text-sm text-foreground mt-1 leading-snug hover:text-primary transition-colors cursor-pointer">{b.title}</h4>
-              <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{b.excerpt}</p>
-              <button className="text-xs text-primary font-semibold hover:underline mt-2.5 flex items-center gap-1">Read article <ArrowRight size={12} /></button>
+        {selectedArticle ? (
+          <div className="space-y-4">
+            <button
+              onClick={() => setSelectedArticle(null)}
+              className="text-xs text-primary font-semibold hover:underline mb-4 flex items-center gap-1"
+            >
+              <ArrowLeft size={12} /> Back to Blog List
+            </button>
+            <div className="space-y-4 text-sm text-foreground/80 leading-relaxed max-w-prose mx-auto">
+              <p className="text-base font-semibold text-foreground leading-snug">{selectedArticle.excerpt}</p>
+              <div className="border-t border-border/50 pt-4 mt-4 space-y-3">
+                <p>Digital transformation in educational institutes plays a pivotal role in ensuring that processes are efficient, transparent, and scalable. By centralizing management features, from grade entry to attendance tracking, CampusLink ensures both students and faculty are aligned at all times.</p>
+                <p>Our research and data collection indicates that instant communication platforms reduce administrative latency by up to 50%. The integration of smart filters and automated reports allows users to focus on high-impact tutoring and guidance rather than standard manual indexing and spreadsheets.</p>
+              </div>
             </div>
-          ))}
-        </div>
+            <div className="flex justify-end pt-4 border-t border-border/50 mt-6">
+              <button
+                onClick={() => setSelectedArticle(null)}
+                className="px-4 py-2 text-sm border border-border rounded-xl hover:bg-muted transition-colors"
+              >
+                Close Article
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {[
+              { title: "AI in Modern Classrooms: The Future of Grading", date: "June 12, 2026", author: "Academic Office", excerpt: "Discover how teachers are using automated intelligence tools to evaluate marks and generate custom question banks using CampusLink AI." },
+              { title: "Connecting Parents with Academic Analytics", date: "May 28, 2026", author: "Liaison Officer", excerpt: "Learn how our live parent portal helps bridge the communication gap between faculty and families, providing live insights on student growth." },
+              { title: "Digital Libraries: Restructuring Campus Knowledge", date: "May 15, 2026", author: "Library Committee", excerpt: "Explore the new librarian dashboard features for real-time returns tracking, automated cataloging, and instant fine collection notifications." }
+            ].map((b, i) => (
+              <div key={i} className="p-4 bg-muted/30 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors">
+                <span className="text-[10px] text-primary font-medium">{b.date} • By {b.author}</span>
+                <h4 onClick={() => setSelectedArticle(b)} className="font-bold text-sm text-foreground mt-1 leading-snug hover:text-primary transition-colors cursor-pointer">{b.title}</h4>
+                <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{b.excerpt}</p>
+                <button onClick={() => setSelectedArticle(b)} className="text-xs text-primary font-semibold hover:underline mt-2.5 flex items-center gap-1">Read article <ArrowRight size={12} /></button>
+              </div>
+            ))}
+          </div>
+        )}
       </Modal>
 
       <Modal
@@ -792,6 +901,115 @@ export default function LandingPage() {
               <p className="text-[10px] text-muted-foreground mt-2 font-medium">Semester {c.sem}</p>
             </div>
           ))}
+        </div>
+      </Modal>
+
+      <Modal
+        open={activeModal === "community"}
+        onClose={() => setActiveModal(null)}
+        title="CampusLink Community Forums"
+        subtitle="Connect with classmates, alumni, and faculty groups"
+        size="lg"
+      >
+        <div className="space-y-3">
+          {[
+            { channel: "#placements-2026", count: 840, desc: "Discussion on upcoming corporate campus drives, preparation questions, and interview shares." },
+            { channel: "#technical-club", count: 520, desc: "Hackathon project planning, coding updates, and weekly developer meetups." },
+            { channel: "#campus-life", count: 1200, desc: "General announcements, cultural events, sports meet details, and campus stories." },
+            { channel: "#alumni-connect", count: 650, desc: "Mentorship channels connecting recent graduates with industry leaders." }
+          ].map((c, i) => (
+            <div key={i} className="p-3 bg-muted/40 rounded-xl border border-border/50 hover:bg-muted/70 transition-colors">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-sm text-foreground">{c.channel}</span>
+                <span className="text-[10px] bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-400 font-bold px-2 py-0.5 rounded-full">{c.count} members</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{c.desc}</p>
+            </div>
+          ))}
+        </div>
+      </Modal>
+
+      <Modal
+        open={activeModal === "scholarships"}
+        onClose={() => setActiveModal(null)}
+        title="Scholarships & Financial Aid"
+        subtitle="Funding schemes and fee waivers available for student enrollment"
+        size="lg"
+      >
+        <div className="space-y-3">
+          {[
+            { name: "Academic Merit Scholarship", waiver: "50% Waiver", criteria: "Top 5% of class in semesters", deadline: "July 15, 2026" },
+            { name: "Need-Based Financial Assistance", waiver: "Up to 100% Waiver", criteria: "Annual family income < ₹3,00,000", deadline: "June 30, 2026" },
+            { name: "Sports Excellence Grant", waiver: "25% Waiver", criteria: "State or National level representation", deadline: "August 01, 2026" }
+          ].map((s, i) => (
+            <div key={i} className="p-3.5 bg-muted/40 rounded-xl border border-border/50">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-sm text-foreground">{s.name}</h4>
+                <span className="text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full">{s.waiver}</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1"><strong>Eligibility:</strong> {s.criteria}</p>
+              <p className="text-[10px] text-rose-500 mt-1"><strong>Application Deadline:</strong> {s.deadline}</p>
+            </div>
+          ))}
+        </div>
+      </Modal>
+
+      <Modal
+        open={activeModal === "contact"}
+        onClose={() => setActiveModal(null)}
+        title="Contact CampusLink Support"
+        subtitle="Get in touch with college administration or tech helpdesk"
+        size="md"
+      >
+        <div className="space-y-4">
+          <div className="space-y-2 text-xs text-muted-foreground">
+            <p><strong>Email:</strong> support@campuslink.edu</p>
+            <p><strong>Liaison Phone:</strong> +91 800-CAMPUS (226787)</p>
+            <p><strong>Helpdesk Hours:</strong> Monday - Saturday (9:00 AM - 5:00 PM)</p>
+          </div>
+          <form onSubmit={(e) => { e.preventDefault(); toast.success("Your message has been sent to the helpdesk!"); setActiveModal(null); }} className="space-y-3 border-t border-border/60 pt-3">
+            <div>
+              <label className="block text-xs font-semibold text-foreground mb-1">Your Email</label>
+              <input required type="email" placeholder="you@example.com" className="w-full text-xs px-3 py-2 bg-card border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-ring" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-foreground mb-1">Message Description</label>
+              <textarea required rows={3} placeholder="How can we assist you?" className="w-full text-xs px-3 py-2 bg-card border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-ring" />
+            </div>
+            <button type="submit" className="w-full py-2 bg-primary text-white rounded-xl font-bold text-xs hover:opacity-90 transition-opacity">Submit Message</button>
+          </form>
+        </div>
+      </Modal>
+
+      <Modal
+        open={activeModal === "privacy"}
+        onClose={() => setActiveModal(null)}
+        title="Privacy Policy"
+        subtitle="Last updated: June 16, 2026"
+        size="lg"
+      >
+        <div className="space-y-3 text-xs text-muted-foreground leading-relaxed">
+          <p>At CampusLink, we are committed to safeguarding user data, academic records, and communications within our ERP platform.</p>
+          <h4 className="font-bold text-foreground mt-2">1. Data We Collect</h4>
+          <p>We collect essential student records (grades, timetables, profile credentials), teacher feedback, fee history, and activity logs to support audits and user safety.</p>
+          <h4 className="font-bold text-foreground mt-2">2. Security Auditing</h4>
+          <p>Every administrative edit, deletion, or creation is stored in a permanent system history log (with user roles, timestamps, and stated reasons) to enforce compliance and audit integrity.</p>
+        </div>
+      </Modal>
+
+      <Modal
+        open={activeModal === "terms"}
+        onClose={() => setActiveModal(null)}
+        title="Terms of Service"
+        subtitle="Last updated: June 16, 2026"
+        size="lg"
+      >
+        <div className="space-y-3 text-xs text-muted-foreground leading-relaxed">
+          <p>Welcome to CampusLink. By logging into this platform, you agree to comply with our academic guidelines and access standards.</p>
+          <h4 className="font-bold text-foreground mt-2">1. Acceptable Use</h4>
+          <p>Users are expected to maintain academic honesty. Impersonation of another student, teacher, or admin account will result in immediate suspension.</p>
+          <h4 className="font-bold text-foreground mt-2">2. Credentials Security</h4>
+          <p>You are responsible for securing your portal passwords. Do not share login details under any circumstances.</p>
         </div>
       </Modal>
     </div>

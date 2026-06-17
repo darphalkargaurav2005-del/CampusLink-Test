@@ -41,10 +41,22 @@ export default function NoticeBoard({ role }: Props) {
   const [notices, setNotices] = useState<Notice[]>(MOCK_NOTICES);
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingNotice, setEditingNotice] = useState<Notice | null>(null);
   const { confirmDelete } = useDeleteConfirm();
   const isAdmin = role === "admin";
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) });
+
+  const handleEdit = (notice: Notice) => {
+    setEditingNotice(notice);
+    reset({
+      title: notice.title,
+      content: notice.content,
+      category: notice.category,
+      priority: notice.priority,
+    });
+    setModalOpen(true);
+  };
 
   const filtered = notices.filter(n =>
     n.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -52,18 +64,24 @@ export default function NoticeBoard({ role }: Props) {
   );
 
   const onSubmit = (data: FormData) => {
-    const newNotice: Notice = {
-      id: `n${Date.now()}`,
-      ...data,
-      category: data.category as Notice["category"],
-      priority: data.priority as Notice["priority"],
-      author: "Admin Office",
-      publishDate: new Date().toISOString().split("T")[0],
-      targetAudience: ["student", "teacher", "parent"],
-    };
-    setNotices(prev => [newNotice, ...prev]);
-    toast.success("Notice published successfully");
+    if (editingNotice) {
+      setNotices(prev => prev.map(n => n.id === editingNotice.id ? { ...n, ...data } : n));
+      toast.success("Notice updated successfully");
+    } else {
+      const newNotice: Notice = {
+        id: `n${Date.now()}`,
+        ...data,
+        category: data.category as Notice["category"],
+        priority: data.priority as Notice["priority"],
+        author: "Admin Office",
+        publishDate: new Date().toISOString().split("T")[0],
+        targetAudience: ["student", "teacher", "parent"],
+      };
+      setNotices(prev => [newNotice, ...prev]);
+      toast.success("Notice published successfully");
+    }
     setModalOpen(false);
+    setEditingNotice(null);
     reset();
   };
 
@@ -73,7 +91,7 @@ export default function NoticeBoard({ role }: Props) {
         title="Notice Board"
         subtitle="Official announcements and notifications"
         action={isAdmin ? (
-          <button onClick={() => setModalOpen(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-xl gradient-brand text-white text-sm font-semibold hover:opacity-90">
+          <button onClick={() => { setEditingNotice(null); reset({ title: "", content: "", category: "", priority: "" }); setModalOpen(true); }} className="flex items-center gap-2 px-4 py-2.5 rounded-xl gradient-brand text-white text-sm font-semibold hover:opacity-90">
             <Plus size={16} /> Post Notice
           </button>
         ) : undefined}
@@ -115,7 +133,7 @@ export default function NoticeBoard({ role }: Props) {
               </div>
               {isAdmin && (
                 <div className="flex gap-1 flex-shrink-0">
-                  <button onClick={() => toast.info("Edit notice")} className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground transition-colors"><Edit2 size={14} /></button>
+                  <button onClick={() => handleEdit(notice)} className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground transition-colors"><Edit2 size={14} /></button>
                   <button
                     onClick={() => confirmDelete({
                       title: "Remove Notice",
@@ -137,11 +155,11 @@ export default function NoticeBoard({ role }: Props) {
         ))}
       </div>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Post New Notice" size="lg"
+      <Modal open={modalOpen} onClose={() => { setModalOpen(false); setEditingNotice(null); reset(); }} title={editingNotice ? "Edit Notice" : "Post New Notice"} size="lg"
         footer={
           <>
-            <button onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm border border-border rounded-xl hover:bg-muted transition-colors">Cancel</button>
-            <button onClick={handleSubmit(onSubmit)} className="px-4 py-2 text-sm gradient-brand text-white rounded-xl font-semibold">Publish Notice</button>
+            <button onClick={() => { setModalOpen(false); setEditingNotice(null); reset(); }} className="px-4 py-2 text-sm border border-border rounded-xl hover:bg-muted transition-colors">Cancel</button>
+            <button onClick={handleSubmit(onSubmit)} className="px-4 py-2 text-sm gradient-brand text-white rounded-xl font-semibold">{editingNotice ? "Save Changes" : "Publish Notice"}</button>
           </>
         }
       >

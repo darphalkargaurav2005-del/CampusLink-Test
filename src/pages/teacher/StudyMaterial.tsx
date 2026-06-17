@@ -53,6 +53,7 @@ const TYPE_COLORS: Record<string, string> = {
 export default function StudyMaterial() {
   const [materials, setMaterials] = useState<MaterialItem[]>(INITIAL_MATERIALS);
   const [modalOpen, setModalOpen] = useState(false);
+  const [previewMaterial, setPreviewMaterial] = useState<MaterialItem | null>(null);
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
   const { confirmDelete } = useDeleteConfirm();
@@ -145,7 +146,7 @@ export default function StudyMaterial() {
                 <span className="ml-auto">{mat.downloads} downloads</span>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => toast.info("Previewing " + mat.title)} className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs border border-border rounded-lg hover:bg-muted transition-colors">
+                <button onClick={() => setPreviewMaterial(mat)} className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs border border-border rounded-lg hover:bg-muted transition-colors">
                   <Eye size={13} /> Preview
                 </button>
                 <button onClick={() => toast.success("Downloaded")} className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs border border-border rounded-lg hover:bg-muted transition-colors">
@@ -219,6 +220,97 @@ export default function StudyMaterial() {
             <p className="text-xs text-muted-foreground/60 mt-1">PDF, PPT, DOCX up to 50MB</p>
           </div>
         </div>
+      </Modal>
+
+      <Modal
+        open={!!previewMaterial}
+        onClose={() => setPreviewMaterial(null)}
+        title={previewMaterial ? `Document Preview - ${previewMaterial.title}` : ""}
+        size="lg"
+      >
+        {previewMaterial && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3.5 bg-muted/40 border border-border/60 rounded-xl">
+              <div>
+                <span className={cn("px-2 py-0.5 rounded-full font-medium text-xs mr-3", TYPE_COLORS[previewMaterial.type])}>
+                  {previewMaterial.type}
+                </span>
+                <span className="text-sm font-semibold text-foreground">{previewMaterial.course}</span>
+              </div>
+              <span className="text-xs text-muted-foreground">{previewMaterial.size} • {previewMaterial.date}</span>
+            </div>
+            
+            <div className="border border-border rounded-xl bg-background p-6 h-96 overflow-y-auto font-sans shadow-inner">
+              <div className="max-w-prose mx-auto space-y-4">
+                <h1 className="text-xl font-bold text-foreground border-b border-border pb-3">{previewMaterial.title}</h1>
+                
+                {previewMaterial.type === "Notes" && (
+                  <div className="space-y-3 text-sm text-foreground/80 leading-relaxed">
+                    <p className="font-semibold text-foreground">1. Introduction</p>
+                    <p>This document contains essential study notes on {previewMaterial.title} for {previewMaterial.course}. Make sure to review the core algorithmic properties and design trade-offs before the midterms.</p>
+                    <p className="font-semibold text-foreground">2. Core Concepts</p>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>Definitions and properties.</li>
+                      <li>Complexity analysis: Time complexity O(log n) average, O(n) worst case.</li>
+                      <li>Standard traversal algorithms: In-order, Pre-order, Post-order.</li>
+                    </ul>
+                    <p className="font-semibold text-foreground">3. Key Takeaways</p>
+                    <p>Always draw out diagrams when verifying recursive structures. Keep operations balanced to ensure optimal retrieval times.</p>
+                  </div>
+                )}
+                
+                {previewMaterial.type === "PDF" && (
+                  <div className="space-y-3 text-sm text-foreground/80 leading-relaxed">
+                    <div className="flex justify-between items-center bg-muted/20 px-3 py-1.5 rounded-lg border border-border/40 text-xs mb-4">
+                      <span>PDF Document (Page 1 of 5)</span>
+                      <span className="text-primary hover:underline cursor-pointer">Go to page 2 →</span>
+                    </div>
+                    <p className="font-semibold text-foreground">Section 4.1: Mathematical Background & Formulations</p>
+                    <p>We formulate the basic integration boundaries and show proofs for structural properties. For any continuous function f(x) over [a, b], we partition the interval to compute Riemann sums.</p>
+                    <div className="p-4 bg-muted/40 rounded-lg font-mono text-xs border border-border/50 text-center my-4">
+                      ∫ [a to b] f(x) dx = lim (n → ∞) Σ [i=1 to n] f(x_i*) Δx
+                    </div>
+                    <p>This proof forms the basis of all numerical computing algorithms used in modern software engineering libraries.</p>
+                  </div>
+                )}
+                
+                {previewMaterial.type === "PPT" && (
+                  <div className="space-y-4 text-center">
+                    <div className="border border-border/70 rounded-xl p-8 bg-muted/10 shadow-sm relative overflow-hidden flex flex-col justify-center items-center h-64">
+                      <div className="absolute top-2 left-2 text-xs text-muted-foreground font-medium">Slide 1 of 12</div>
+                      <Presentation size={36} className="text-amber-500 mb-4" />
+                      <h2 className="text-lg font-bold text-foreground mb-2">{previewMaterial.title}</h2>
+                      <p className="text-xs text-muted-foreground">{previewMaterial.course} Presentation</p>
+                      <div className="absolute bottom-2 right-2 text-xs text-muted-foreground font-medium">Click next below to navigate</div>
+                    </div>
+                    <div className="flex justify-center gap-2">
+                      <button className="px-3 py-1 text-xs border border-border rounded hover:bg-muted transition-colors disabled:opacity-50" disabled>Previous</button>
+                      <button className="px-3 py-1 text-xs border border-border rounded hover:bg-muted transition-colors">Next Slide</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-2.5">
+              <button
+                onClick={() => {
+                  toast.success("Downloaded " + previewMaterial.title);
+                  setPreviewMaterial(null);
+                }}
+                className="flex items-center gap-2 px-4 py-2 text-sm gradient-brand text-white rounded-xl font-semibold hover:opacity-90"
+              >
+                <Download size={14} /> Download Document
+              </button>
+              <button
+                onClick={() => setPreviewMaterial(null)}
+                className="px-4 py-2 text-sm border border-border rounded-xl hover:bg-muted transition-colors"
+              >
+                Close Preview
+              </button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

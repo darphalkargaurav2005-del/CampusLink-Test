@@ -26,6 +26,13 @@ class CampusStore {
   notices: Notice[] = [...MOCK_NOTICES];
   fees: FeeRecord[] = [...MOCK_FEES];
   assignments: Assignment[] = [...MOCK_ASSIGNMENTS];
+  users = [
+    { id: "u1", name: "Dr. Pradeep Srivastava", email: "admin@campus.edu", role: "Institute Admin", status: "Active", lastLogin: "2024-02-28", department: "Administration" },
+    { id: "u2", name: "Dr. Anand Kumar", email: "teacher@campus.edu", role: "Teacher", status: "Active", lastLogin: "2024-02-28", department: "Computer Science" },
+    { id: "u3", name: "Aisha Sharma", email: "student@campus.edu", role: "Student", status: "Active", lastLogin: "2024-02-27", department: "Computer Science" },
+    { id: "u4", name: "Rajesh Sharma", email: "parent@campus.edu", role: "Parent", status: "Active", lastLogin: "2024-02-25", department: "-" },
+    { id: "u5", name: "Mrs. Kavitha Menon", email: "librarian@campus.edu", role: "Librarian", status: "Active", lastLogin: "2024-02-28", department: "Library" },
+  ];
 
   // History log
   history: HistoryEntry[] = [

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -52,16 +52,30 @@ const DEMO_CREDENTIALS: Array<{
 ];
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const roleParam = searchParams.get("role");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      navigate(`/${user.role}/dashboard`, { replace: true });
+    }
+  }, [user, navigate]);
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { role: "", remember: false },
   });
+
+  useEffect(() => {
+    if (roleParam && ["admin", "teacher", "student", "parent", "librarian"].includes(roleParam)) {
+      setValue("role", roleParam);
+    }
+  }, [roleParam, setValue]);
 
   const fillDemoCredentials = (credential: (typeof DEMO_CREDENTIALS)[number]) => {
     setValue("role", credential.role, { shouldDirty: true, shouldTouch: true, shouldValidate: true });

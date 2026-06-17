@@ -344,8 +344,12 @@ export default function Navbar({ onMenuToggle, sidebarOpen, title }: NavbarProps
             onClick={() => { setProfileOpen(!profileOpen); setNotifOpen(false); }}
             className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-muted transition-colors"
           >
-            <div className="w-8 h-8 rounded-full gradient-brand flex items-center justify-center text-white font-semibold text-sm">
-              {user?.name.charAt(0)}
+            <div className="w-8 h-8 rounded-full gradient-brand flex items-center justify-center text-white font-semibold text-sm overflow-hidden">
+              {user?.avatar ? (
+                <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+              ) : (
+                user?.name.charAt(0)
+              )}
             </div>
             <div className="hidden sm:block text-left">
               <p className="text-xs font-semibold text-foreground leading-none mb-0.5">{user?.name.split(" ").slice(0, 2).join(" ")}</p>

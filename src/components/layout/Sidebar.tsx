@@ -69,8 +69,12 @@ export default function Sidebar({ navItems, isOpen, onClose, roleName, roleColor
         {/* User info */}
         <div className="px-4 py-3 border-b border-sidebar-border flex-shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0", roleColor)}>
-              {user?.name.charAt(0)}
+            <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0 overflow-hidden", roleColor)}>
+              {user?.avatar ? (
+                <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+              ) : (
+                user?.name.charAt(0)
+              )}
             </div>
             <div className="min-w-0">
               <p className="text-sm font-semibold text-white truncate leading-snug">{user?.name.split(" ").slice(0, 2).join(" ")}</p>
