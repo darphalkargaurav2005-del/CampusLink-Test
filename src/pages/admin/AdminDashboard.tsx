@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Users, GraduationCap, UserCog, BookCopy, Wallet, TrendingUp, AlertTriangle, CheckCircle2, BookOpen, CalendarCheck, Clock, BarChart2, Activity } from "lucide-react";
+import { Users, GraduationCap, UserCog, BookCopy, Wallet, TrendingUp, AlertTriangle, CheckCircle2, BookOpen, CalendarCheck, Clock, BarChart2, Activity, Trash2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, PieChart, Pie, Cell, Legend } from "recharts";
 import StatCard from "@/components/features/StatCard";
 import ChartCard from "@/components/features/ChartCard";
 import PageHeader from "@/components/features/PageHeader";
 import { ANALYTICS_FEE_COLLECTION, ANALYTICS_ADMISSIONS, DEPARTMENT_DISTRIBUTION, TEACHER_ATTENDANCE_DATA, MOCK_NOTICES } from "@/constants/mockData";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const TASKS = [
   { id: 1, title: "Review Q3 Admission Reports", priority: "high", due: "Today", status: "pending", assignee: "Admin" },
@@ -32,11 +33,55 @@ export default function AdminDashboard() {
 
   const feeData = ANALYTICS_FEE_COLLECTION.map(d => ({ ...d, fees: Math.round((d.fees ?? 0) / 100000) }));
 
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+
+  const handleAddTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTaskTitle.trim()) return;
+    const newTask = {
+      id: Date.now(),
+      title: newTaskTitle.trim(),
+      priority: "medium" as const,
+      due: "Today",
+      status: "pending" as const,
+      assignee: "Admin",
+    };
+    setTasks(prev => [newTask, ...prev]);
+    setNewTaskTitle("");
+    toast.success("Task added successfully");
+  };
+
   const toggleTask = (id: number) => {
     setTasks(prev => prev.map(t => t.id === id ? {
       ...t,
       status: t.status === "completed" ? "pending" : "completed"
     } : t));
+  };
+
+  const cycleStatus = (id: number) => {
+    const statusCycle: Record<string, string> = {
+      "pending": "in-progress",
+      "in-progress": "completed",
+      "completed": "pending"
+    };
+    setTasks(prev => prev.map(t => t.id === id ? {
+      ...t,
+      status: (statusCycle[t.status] || "pending") as any
+    } : t));
+    toast.info("Task status updated");
+  };
+
+  const cyclePriority = (id: number) => {
+    const priorityCycle: Record<string, string> = {
+      "low": "medium",
+      "medium": "high",
+      "high": "low"
+    };
+    setTasks(prev => prev.map(t => t.id === id ? {
+      ...t,
+      priority: (priorityCycle[t.priority] || "medium") as any
+    } : t));
+    toast.info("Task priority updated");
   };
 
   const filteredTasks = tasks.filter(t => activeTaskFilter === "all" || t.status === activeTaskFilter);
@@ -178,6 +223,21 @@ export default function AdminDashboard() {
                   </button>
                 ))}
               </div>
+              <form onSubmit={handleAddTask} className="flex gap-2 mt-3.5">
+                <input
+                  type="text"
+                  placeholder="Add a new task..."
+                  value={newTaskTitle}
+                  onChange={e => setNewTaskTitle(e.target.value)}
+                  className="flex-1 px-3 py-1.5 text-xs bg-background border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+                <button
+                  type="submit"
+                  className="px-3 py-1.5 text-xs font-semibold gradient-brand text-white rounded-lg hover:opacity-90"
+                >
+                  Add
+                </button>
+              </form>
             </div>
 
             <div className="divide-y divide-border max-h-[280px] overflow-y-auto">
@@ -221,20 +281,39 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className={cn("text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full", {
-                        "bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400": task.priority === "high",
-                        "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400": task.priority === "medium",
-                        "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400": task.priority === "low",
-                      })}>
+                      <button
+                        type="button"
+                        onClick={() => cyclePriority(task.id)}
+                        className={cn("text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full cursor-pointer hover:opacity-85 transition-opacity", {
+                          "bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400": task.priority === "high",
+                          "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400": task.priority === "medium",
+                          "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400": task.priority === "low",
+                        })}
+                      >
                         {task.priority}
-                      </span>
-                      <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium capitalize", {
-                        "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400": task.status === "pending",
-                        "bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400": task.status === "in-progress",
-                        "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400": task.status === "completed",
-                      })}>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => cycleStatus(task.id)}
+                        className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium capitalize cursor-pointer hover:opacity-85 transition-opacity", {
+                          "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400": task.status === "pending",
+                          "bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400": task.status === "in-progress",
+                          "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400": task.status === "completed",
+                        })}
+                      >
                         {task.status.replace("-", " ")}
-                      </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTasks(prev => prev.filter(t => t.id !== task.id));
+                          toast.success("Task deleted");
+                        }}
+                        className="p-1 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded text-muted-foreground hover:text-rose-600 transition-colors opacity-0 group-hover:opacity-100"
+                        title="Delete task"
+                      >
+                        <Trash2 size={13} />
+                      </button>
                     </div>
                   </motion.div>
                 ))

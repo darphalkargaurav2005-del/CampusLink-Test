@@ -4,7 +4,8 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import StatCard from "@/components/features/StatCard";
 import ChartCard from "@/components/features/ChartCard";
 import PageHeader from "@/components/features/PageHeader";
-import { ANALYTICS_ATTENDANCE, MOCK_NOTICES } from "@/constants/mockData";
+import { ANALYTICS_ATTENDANCE } from "@/constants/mockData";
+import { store } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 const SUBJECT_MARKS = [
@@ -71,7 +72,7 @@ export default function ParentDashboard() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="bg-card border border-border rounded-xl p-5 shadow-card">
         <h3 className="font-semibold text-foreground text-sm font-display mb-4">Recent Announcements</h3>
         <div className="space-y-3">
-          {MOCK_NOTICES.slice(0, 3).map(n => (
+          {store.notices.filter(n => n.targetAudience.includes("parent")).slice(0, 3).map(n => (
             <div key={n.id} className="flex items-start gap-3 p-3 bg-muted/50 rounded-xl">
               <div className={cn("w-2 h-2 mt-1.5 rounded-full flex-shrink-0", n.priority === "high" ? "bg-rose-500" : n.priority === "medium" ? "bg-amber-500" : "bg-emerald-500")} />
               <div>

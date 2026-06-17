@@ -11,6 +11,7 @@ import { MOCK_ASSIGNMENTS } from "@/constants/mockData";
 import type { Assignment } from "@/types";
 import { cn } from "@/lib/utils";
 import { useDeleteConfirm } from "@/contexts/DeleteConfirmContext";
+import { store } from "@/lib/store";
 
 const schema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -23,7 +24,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function Assignments() {
-  const [assignments, setAssignments] = useState<Assignment[]>(MOCK_ASSIGNMENTS);
+  const [assignments, setAssignments] = useState<Assignment[]>(() => store.assignments);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
   const { confirmDelete } = useDeleteConfirm();
@@ -44,11 +45,13 @@ export default function Assignments() {
 
   const onSubmit = (data: FormData) => {
     if (editingAssignment) {
-      setAssignments(prev => prev.map(a => a.id === editingAssignment.id ? {
+      const updated = assignments.map(a => a.id === editingAssignment.id ? {
         ...a,
         ...data,
         maxMarks: Number(data.maxMarks),
-      } : a));
+      } : a);
+      store.assignments = updated;
+      setAssignments(updated);
       toast.success("Assignment updated successfully");
     } else {
       const newA: Assignment = {
@@ -61,7 +64,9 @@ export default function Assignments() {
         totalStudents: 65,
         status: "active",
       };
-      setAssignments(prev => [newA, ...prev]);
+      const updated = [newA, ...assignments];
+      store.assignments = updated;
+      setAssignments(updated);
       toast.success("Assignment created and published");
     }
     setModalOpen(false);
@@ -115,7 +120,9 @@ export default function Assignments() {
                       itemName: a.title,
                       itemType: "Assignment",
                       onConfirm: () => {
-                        setAssignments(prev => prev.filter(x => x.id !== a.id));
+                        const updated = assignments.filter(x => x.id !== a.id);
+                        store.assignments = updated;
+                        setAssignments(updated);
                         toast.success("Assignment deleted");
                       }
                     })}

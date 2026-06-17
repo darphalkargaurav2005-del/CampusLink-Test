@@ -4,7 +4,8 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import StatCard from "@/components/features/StatCard";
 import ChartCard from "@/components/features/ChartCard";
 import PageHeader from "@/components/features/PageHeader";
-import { MOCK_ASSIGNMENTS, MOCK_COURSES, ANALYTICS_ATTENDANCE, SUBJECT_PERFORMANCE } from "@/constants/mockData";
+import { MOCK_COURSES, ANALYTICS_ATTENDANCE, SUBJECT_PERFORMANCE } from "@/constants/mockData";
+import { store } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 export default function TeacherDashboard() {
@@ -81,7 +82,7 @@ export default function TeacherDashboard() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-card border border-border rounded-xl p-5 shadow-card">
           <h3 className="font-semibold text-foreground text-sm font-display mb-4">Pending Assignments</h3>
           <div className="space-y-3">
-            {MOCK_ASSIGNMENTS.filter(a => a.status === "active").map(a => (
+            {store.assignments.filter(a => a.status === "active").map(a => (
               <div key={a.id} className="flex items-start justify-between gap-3 p-3 bg-muted/50 rounded-xl">
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-foreground text-sm truncate">{a.title}</p>

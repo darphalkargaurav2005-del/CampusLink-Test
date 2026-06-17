@@ -83,6 +83,17 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/blog" element={<LandingPage />} />
+      <Route path="/faq" element={<LandingPage />} />
+      <Route path="/tutors" element={<LandingPage />} />
+      <Route path="/courses" element={<LandingPage />} />
+      <Route path="/community" element={<LandingPage />} />
+      <Route path="/scholarships" element={<LandingPage />} />
+      <Route path="/about" element={<LandingPage />} />
+      <Route path="/contact" element={<LandingPage />} />
+      <Route path="/privacy" element={<LandingPage />} />
+      <Route path="/terms" element={<LandingPage />} />
+      <Route path="/career" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />

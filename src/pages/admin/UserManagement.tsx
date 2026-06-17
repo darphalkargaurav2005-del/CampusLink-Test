@@ -209,7 +209,7 @@ export default function UserManagement() {
             </button>
             <button
               onClick={handleSaveUser}
-              className="px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition-colors"
+              className="px-4 py-2 text-sm gradient-brand text-white rounded-xl font-semibold hover:opacity-90 transition-opacity"
             >
               {editingUser ? "Save Changes" : "Invite User"}
             </button>

@@ -1,5 +1,5 @@
 import PageHeader from "@/components/features/PageHeader";
-import { MOCK_NOTICES } from "@/constants/mockData";
+import { store } from "@/lib/store";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -8,7 +8,7 @@ export default function ParentAnnouncements() {
     <div>
       <PageHeader title="Announcements" subtitle="Official college announcements and notices" />
       <div className="space-y-4">
-        {MOCK_NOTICES.filter(n => n.targetAudience.includes("parent")).map((notice, idx) => (
+        {store.notices.filter(n => n.targetAudience.includes("parent")).map((notice, idx) => (
           <motion.div key={notice.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.07 }} className="bg-card border border-border rounded-xl p-5 shadow-card">
             <div className="flex items-start gap-3">
               <div className={cn("w-2.5 h-2.5 mt-1.5 rounded-full flex-shrink-0", notice.priority === "high" ? "bg-rose-500" : notice.priority === "medium" ? "bg-amber-500" : "bg-emerald-500")} />

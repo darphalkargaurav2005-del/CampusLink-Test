@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import PageHeader from "@/components/features/PageHeader";
 import Modal from "@/components/features/Modal";
-import { MOCK_ASSIGNMENTS } from "@/constants/mockData";
+import { store } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 export default function StudentAssignments() {
@@ -28,9 +28,9 @@ export default function StudentAssignments() {
 
       <div className="grid grid-cols-3 gap-3 mb-5">
         {[
-          { label: "Total", value: MOCK_ASSIGNMENTS.length, color: "text-foreground" },
+          { label: "Total", value: store.assignments.length, color: "text-foreground" },
           { label: "Submitted", value: submitted.size, color: "text-emerald-600" },
-          { label: "Pending", value: MOCK_ASSIGNMENTS.length - submitted.size, color: "text-amber-600" },
+          { label: "Pending", value: store.assignments.length - submitted.size, color: "text-amber-600" },
         ].map((s, i) => (
           <div key={i} className="bg-card border border-border rounded-xl p-4 text-center shadow-card">
             <p className={cn("text-2xl font-bold font-display", s.color)}>{s.value}</p>
@@ -40,7 +40,7 @@ export default function StudentAssignments() {
       </div>
 
       <div className="space-y-4">
-        {MOCK_ASSIGNMENTS.map((a, idx) => {
+        {store.assignments.map((a, idx) => {
           const isSubmitted = submitted.has(a.id);
           const overdue = isOverdue(a.dueDate) && !isSubmitted;
           return (

@@ -11,6 +11,7 @@ import { MOCK_NOTICES } from "@/constants/mockData";
 import type { Notice } from "@/types";
 import { cn } from "@/lib/utils";
 import { useDeleteConfirm } from "@/contexts/DeleteConfirmContext";
+import { store } from "@/lib/store";
 
 interface Props { role: string; }
 
@@ -38,7 +39,7 @@ const PRIORITY_COLORS: Record<string, string> = {
 };
 
 export default function NoticeBoard({ role }: Props) {
-  const [notices, setNotices] = useState<Notice[]>(MOCK_NOTICES);
+  const [notices, setNotices] = useState<Notice[]>(() => store.notices);
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingNotice, setEditingNotice] = useState<Notice | null>(null);
@@ -58,14 +59,18 @@ export default function NoticeBoard({ role }: Props) {
     setModalOpen(true);
   };
 
-  const filtered = notices.filter(n =>
-    n.title.toLowerCase().includes(search.toLowerCase()) ||
-    n.category.includes(search.toLowerCase())
-  );
+  const filtered = notices.filter(n => {
+    const matchesAudience = isAdmin || n.targetAudience.includes(role as any);
+    const matchesSearch = n.title.toLowerCase().includes(search.toLowerCase()) ||
+                          n.category.toLowerCase().includes(search.toLowerCase());
+    return matchesAudience && matchesSearch;
+  });
 
   const onSubmit = (data: FormData) => {
     if (editingNotice) {
-      setNotices(prev => prev.map(n => n.id === editingNotice.id ? { ...n, ...data } : n));
+      const updated = notices.map(n => n.id === editingNotice.id ? { ...n, ...data } : n);
+      store.notices = updated;
+      setNotices(updated);
       toast.success("Notice updated successfully");
     } else {
       const newNotice: Notice = {
@@ -77,7 +82,9 @@ export default function NoticeBoard({ role }: Props) {
         publishDate: new Date().toISOString().split("T")[0],
         targetAudience: ["student", "teacher", "parent"],
       };
-      setNotices(prev => [newNotice, ...prev]);
+      const updated = [newNotice, ...notices];
+      store.notices = updated;
+      setNotices(updated);
       toast.success("Notice published successfully");
     }
     setModalOpen(false);
@@ -140,7 +147,9 @@ export default function NoticeBoard({ role }: Props) {
                       itemName: notice.title,
                       itemType: "Notice",
                       onConfirm: () => {
-                        setNotices(prev => prev.filter(n => n.id !== notice.id));
+                        const updated = notices.filter(n => n.id !== notice.id);
+                        store.notices = updated;
+                        setNotices(updated);
                         toast.success("Notice removed");
                       }
                     })}

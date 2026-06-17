@@ -4,11 +4,12 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import StatCard from "@/components/features/StatCard";
 import ChartCard from "@/components/features/ChartCard";
 import PageHeader from "@/components/features/PageHeader";
-import { ANALYTICS_ATTENDANCE, MOCK_ASSIGNMENTS, MOCK_COURSES, SUBJECT_PERFORMANCE } from "@/constants/mockData";
+import { ANALYTICS_ATTENDANCE, MOCK_COURSES, SUBJECT_PERFORMANCE } from "@/constants/mockData";
+import { store } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 export default function StudentDashboard() {
-  const upcoming = MOCK_ASSIGNMENTS.filter(a => a.status === "active").slice(0, 3);
+  const upcoming = store.assignments.filter(a => a.status === "active").slice(0, 3);
 
   const recentGrades = [
     { subject: "Data Structures", grade: "A", marks: "26/30", date: "Feb 20" },

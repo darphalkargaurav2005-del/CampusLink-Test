@@ -10,8 +10,36 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { MOCK_NOTIFICATIONS } from "@/constants/mockData";
 import { ROLE_LABELS } from "@/lib/auth";
+
+const ROLE_NOTIFICATIONS: Record<string, Array<{ id: string; title: string; message: string; type: "info" | "success" | "warning" | "error"; timestamp: string; read: boolean }>> = {
+  admin: [
+    { id: "a_notif1", title: "Admissions Review Pending", message: "Review Q3 admission growth and approve 12 pending student profiles.", type: "warning", timestamp: "2024-02-28T10:30:00Z", read: false },
+    { id: "a_notif2", title: "Staff Report Submitted", message: "Dr. Anand Kumar submitted the monthly department attendance sheet.", type: "success", timestamp: "2024-02-27T09:00:00Z", read: false },
+    { id: "a_notif3", title: "System Health Alert", message: "All ERP channels running smoothly. Auto-backup completed.", type: "info", timestamp: "2024-02-26T14:20:00Z", read: true },
+  ],
+  teacher: [
+    { id: "t_notif1", title: "Mid-Term Exam Schedule", message: "Mid-semester examination timetable has been published.", type: "info", timestamp: "2024-02-28T10:30:00Z", read: false },
+    { id: "t_notif2", title: "Attendance Sheet Due", message: "Please submit your class digital attendance data for review.", type: "warning", timestamp: "2024-02-27T09:00:00Z", read: false },
+    { id: "t_notif3", title: "Marks Saved Successfully", message: "Data Structures marks saved to academic catalog database.", type: "success", timestamp: "2024-02-26T14:20:00Z", read: true },
+  ],
+  student: [
+    { id: "s_notif1", title: "New Assignment Posted", message: "Dr. Anand Kumar posted a new assignment in Data Structures & Algorithms.", type: "info", timestamp: "2024-02-28T10:30:00Z", read: false },
+    { id: "s_notif2", title: "Attendance Warning", message: "Your attendance in Engineering Physics has dropped below 75%.", type: "warning", timestamp: "2024-02-27T09:00:00Z", read: false },
+    { id: "s_notif3", title: "Fee Payment Successful", message: "Your tuition fee payment of Rs. 45,000 has been received.", type: "success", timestamp: "2024-02-26T14:20:00Z", read: true },
+    { id: "s_notif4", title: "Exam Timetable Released", message: "Mid-semester examination timetable has been published.", type: "info", timestamp: "2024-02-25T11:00:00Z", read: true },
+  ],
+  parent: [
+    { id: "p_notif1", title: "Child Progress Update", message: "Aisha Sharma's grades in Data Structures have been updated to A.", type: "success", timestamp: "2024-02-28T10:30:00Z", read: false },
+    { id: "p_notif2", title: "Attendance Alert", message: "Aisha's attendance has been marked present for all lectures today.", type: "info", timestamp: "2024-02-27T09:00:00Z", read: false },
+    { id: "p_notif3", title: "Tuition Invoice Received", message: "Upcoming Tuition Fee for Next Term ₹45,000 generated.", type: "warning", timestamp: "2024-02-26T14:20:00Z", read: true },
+  ],
+  librarian: [
+    { id: "l_notif1", title: "Book Return Received", message: "Clean Code was successfully returned by student Rohan Mehta.", type: "success", timestamp: "2024-02-28T10:30:00Z", read: false },
+    { id: "l_notif2", title: "Book Request Pending", message: "Student Aisha Sharma requested 'The Pragmatic Programmer'.", type: "info", timestamp: "2024-02-27T09:00:00Z", read: false },
+    { id: "l_notif3", title: "Overdue Alert", message: "Operating System Concepts is overdue by student Karan Singh.", type: "error", timestamp: "2024-02-26T14:20:00Z", read: true },
+  ],
+};
 import { cn } from "@/lib/utils";
 
 interface NavbarProps {
@@ -102,7 +130,13 @@ export default function Navbar({ onMenuToggle, sidebarOpen, title }: NavbarProps
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
-  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState(() => ROLE_NOTIFICATIONS[user?.role ?? "admin"] || []);
+
+  useEffect(() => {
+    if (user) {
+      setNotifications(ROLE_NOTIFICATIONS[user.role] || []);
+    }
+  }, [user]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 

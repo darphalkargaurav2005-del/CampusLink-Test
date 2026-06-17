@@ -38,7 +38,7 @@ const TABS = [
 
 export default function Settings() {
   const { user, updateUser } = useAuth();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, colorPalette, setColorPalette } = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "profile";
   const setActiveTab = (tab: string) => setSearchParams({ tab });
@@ -208,9 +208,9 @@ export default function Settings() {
             {activeTab === "appearance" && (
               <div>
                 <h2 className="font-semibold text-foreground text-base mb-5 font-display">Appearance</h2>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div>
-                    <p className="font-medium text-foreground text-sm mb-3">Theme</p>
+                    <p className="font-medium text-foreground text-sm mb-3">Theme Mode</p>
                     <div className="grid grid-cols-2 gap-3 max-w-xs">
                       {[
                         { value: "light", label: "Light Mode" },
@@ -219,9 +219,35 @@ export default function Settings() {
                         <button
                           key={t.value}
                           onClick={() => { setTheme(t.value as "light" | "dark"); toast.success(`${t.label} enabled`); }}
-                          className={cn("p-4 border rounded-xl text-sm font-medium transition-all", theme === t.value ? "border-primary gradient-brand text-white" : "border-border hover:bg-muted")}
+                          className={cn("p-4 border rounded-xl text-sm font-medium transition-all text-center", theme === t.value ? "border-primary gradient-brand text-white" : "border-border hover:bg-muted")}
                         >
                           {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="border-t border-border pt-5">
+                    <p className="font-medium text-foreground text-sm mb-3">Accent Color Palette</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 max-w-xl">
+                      {[
+                        { value: "default", label: "Indigo (Default)", color: "bg-indigo-600" },
+                        { value: "emerald", label: "Emerald", color: "bg-emerald-600" },
+                        { value: "sky", label: "Sky Blue", color: "bg-sky-600" },
+                        { value: "rose", label: "Rose Pink", color: "bg-rose-600" },
+                        { value: "violet", label: "Violet Purple", color: "bg-violet-600" },
+                      ].map(p => (
+                        <button
+                          key={p.value}
+                          type="button"
+                          onClick={() => { setColorPalette(p.value as any); toast.success(`${p.label} palette applied`); }}
+                          className={cn(
+                            "p-3 border rounded-xl flex flex-col items-center gap-2 text-xs font-semibold transition-all text-center",
+                            colorPalette === p.value ? "border-primary bg-primary/5 text-foreground" : "border-border hover:bg-muted"
+                          )}
+                        >
+                          <div className={cn("w-6 h-6 rounded-full shadow-inner", p.color)} />
+                          <span>{p.label.split(" ")[0]}</span>
                         </button>
                       ))}
                     </div>
