@@ -94,6 +94,7 @@ function AppRoutes() {
       <Route path="/privacy" element={<LandingPage />} />
       <Route path="/terms" element={<LandingPage />} />
       <Route path="/career" element={<LandingPage />} />
+      <Route path="/pricing" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -195,9 +196,41 @@ function AppRoutes() {
   );
 }
 
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+
+function ScrollToTop() {
+  const { pathname, hash } = useLocation();
+
+  useEffect(() => {
+    if (hash) {
+      const id = hash.slice(1);
+      let attempts = 0;
+      const interval = setInterval(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+          clearInterval(interval);
+        } else if (attempts > 10) {
+          clearInterval(interval);
+          window.scrollTo(0, 0);
+        }
+        attempts++;
+      }, 100);
+
+      return () => clearInterval(interval);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname, hash]);
+
+  return null;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <ThemeProvider>
         <AuthProvider>
           <DeleteConfirmProvider>

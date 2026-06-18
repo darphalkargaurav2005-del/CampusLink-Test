@@ -17,35 +17,16 @@ import Modal from "@/components/features/Modal";
 import { toast } from "sonner";
 
 /* ─── NAV DATA ─────────────────────────────────────────── */
-const PLATFORM_ITEMS = [
-  { label: "Students", href: "/login", icon: GraduationCap, desc: "Grades, attendance & assignments" },
-  { label: "Parents", href: "/login", icon: Users, desc: "Monitor child's academic progress" },
-  { label: "Institute", href: "/login", icon: Building2, desc: "Admin & institutional control" },
-  { label: "Teachers", href: "/login", icon: BookUser, desc: "Classes, marks & materials" },
-  { label: "Librarian", href: "/login", icon: BookOpen, desc: "Books, issuing & fine management" },
-];
-
 const RESOURCES_ITEMS = [
   { label: "Blog", href: "/blog", icon: Newspaper, desc: "Latest news & updates" },
   { label: "FAQ", href: "/faq", icon: HelpCircle, desc: "Frequently asked questions" },
   { label: "Career Guidance", href: "/career", icon: Compass, desc: "Student career pathways" },
 ];
 
-const FOOTER_PLATFORM = ["Features", "Pricing", "Parents", "Students", "Teachers", "Institute", "Librarian"];
 const FOOTER_RESOURCES = ["Blog", "FAQ", "Tutors", "Community", "Scholarships", "Courses"];
 const FOOTER_COMPANY = ["About Us", "Contact", "Privacy Policy", "Terms of Service"];
 
-/* ─── FEATURES ────────────────────────────────────────── */
-const FEATURES = [
-  { icon: GraduationCap, title: "Student Management", desc: "Complete enrollment, attendance, results, and academic tracking with automated analytics.", color: "text-brand-600 dark:text-brand-400", bg: "bg-brand-50 dark:bg-brand-950/30" },
-  { icon: UserCheck, title: "Digital Attendance", desc: "Real-time attendance marking with instant parent notifications and compliance alerts.", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-950/30" },
-  { icon: BarChart3, title: "Analytics Dashboard", desc: "Live charts, reports, and AI-powered insights for data-driven institutional decisions.", color: "text-sky-600 dark:text-sky-400", bg: "bg-sky-50 dark:bg-sky-950/30" },
-  { icon: BookMarked, title: "Library System", desc: "Full-featured library with book issuing, returns, fine calculation, and inventory control.", color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-950/30" },
-  { icon: MessageSquare, title: "Communication Hub", desc: "Seamless messaging between students, parents, teachers, and administration.", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-950/30" },
-  { icon: Layers, title: "Fee Management", desc: "Automated fee collection, payment tracking, reminders, and receipt generation.", color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-950/30" },
-  { icon: Calendar, title: "Scheduling", desc: "Dynamic timetable generation, teacher assignments, and resource optimization.", color: "text-teal-600 dark:text-teal-400", bg: "bg-teal-50 dark:bg-teal-950/30" },
-  { icon: Sparkles, title: "AI Assistant", desc: "Built-in AI for question paper generation, performance analysis, and study assistance.", color: "text-pink-600 dark:text-pink-400", bg: "bg-pink-50 dark:bg-pink-950/30" },
-];
+
 
 const PORTALS = [
   { role: "Admin", icon: Shield, color: "from-violet-500 to-indigo-600", desc: "Full institutional control — manage students, teachers, fees, courses, and analytics.", features: ["User Management", "Fee Oversight", "Reports & Analytics", "Notice Management"] },
@@ -187,33 +168,19 @@ export default function LandingPage() {
 
             {/* Desktop Nav */}
             <div className="hidden lg:flex items-center gap-0.5">
-              {/* Platform dropdown */}
-              <div className="transition-colors">
-                <NavDropdown label="Platform" items={PLATFORM_ITEMS} />
-              </div>
+
 
               {["Courses", "Tutors", "Pricing"].map(label => {
-                if (label === "Pricing") {
-                  return (
-                    <Link
-                      key={label}
-                      to="/#pricing"
-                      onClick={() => {
-                        if (pathname === "/") {
-                          document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
-                        }
-                      }}
-                      className="px-3 py-2 text-sm font-medium rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                    >
-                      {label}
-                    </Link>
-                  );
-                }
-                const path = label === "Courses" ? "/courses" : "/tutors";
+                const path = label === "Courses" ? "/courses" : label === "Tutors" ? "/tutors" : "/pricing";
                 return (
                   <Link
                     key={label}
                     to={path}
+                    onClick={() => {
+                      if (pathname === path) {
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }
+                    }}
                     className="px-3 py-2 text-sm font-medium rounded-lg transition-all text-left text-muted-foreground hover:text-foreground hover:bg-muted/60"
                   >
                     {label}
@@ -228,6 +195,11 @@ export default function LandingPage() {
 
               <Link
                 to="/about"
+                onClick={() => {
+                  if (pathname === "/about") {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }
+                }}
                 className="px-3 py-2 text-sm font-medium rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-muted/60"
               >
                 About
@@ -242,12 +214,34 @@ export default function LandingPage() {
                 {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
               </button>
               {user ? (
-                <Link
-                  to={`/${user.role}/dashboard`}
-                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold gradient-brand text-white rounded-xl hover:opacity-90 transition-opacity shadow-sm"
-                >
-                  Dashboard <ArrowRight size={14} />
-                </Link>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 mr-1 hidden sm:flex">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Logged in as: <span className="text-foreground font-bold">{user.name}</span>
+                      <span className="text-[9px] uppercase font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full ml-2 inline-flex items-center gap-1">
+                        {user.role === "admin" && <Shield size={9} />}
+                        {user.role === "teacher" && <GraduationCap size={9} />}
+                        {user.role === "student" && <BookOpen size={9} />}
+                        {user.role === "parent" && <Users size={9} />}
+                        {user.role === "librarian" && <BookMarked size={9} />}
+                        {user.role}
+                      </span>
+                    </span>
+                  </div>
+                  <Link
+                    to={`/${user.role}/dashboard`}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted/60 transition-all"
+                  >
+                    Dashboard
+                    <div className="w-6 h-6 rounded-full gradient-brand flex items-center justify-center text-white font-bold text-[10px] overflow-hidden shadow-sm flex-shrink-0">
+                      {user.avatar ? (
+                        <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                      ) : (
+                        user.name.charAt(0)
+                      )}
+                    </div>
+                  </Link>
+                </div>
               ) : (
                 <>
                   <Link
@@ -286,18 +280,9 @@ export default function LandingPage() {
               className="lg:hidden border-t border-border bg-background overflow-hidden"
             >
               <div className="px-4 py-4 space-y-1">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-3 mb-2">Platform</p>
-                {PLATFORM_ITEMS.map((item, i) => (
-                  <Link key={i} to={item.href} onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-foreground hover:bg-muted transition-colors">
-                    <item.icon size={16} className="text-brand-500" />
-                    {item.label}
-                  </Link>
-                ))}
-                <div className="border-t border-border my-2" />
                 {["Courses", "Tutors", "Pricing", "About"].map(l => {
                   let path = "/";
-                  if (l === "Pricing") path = "/#pricing";
+                  if (l === "Pricing") path = "/pricing";
                   else if (l === "About") path = "/about";
                   else if (l === "Courses") path = "/courses";
                   else if (l === "Tutors") path = "/tutors";
@@ -305,8 +290,8 @@ export default function LandingPage() {
                   return (
                     <Link key={l} to={path} onClick={() => {
                       setMobileMenuOpen(false);
-                      if (l === "Pricing" && pathname === "/") {
-                        document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
+                      if (pathname === path) {
+                        window.scrollTo({ top: 0, behavior: "smooth" });
                       }
                     }}
                       className="block px-3 py-2.5 rounded-xl text-sm font-medium text-foreground hover:bg-muted transition-colors">
@@ -324,12 +309,35 @@ export default function LandingPage() {
                   </Link>
                 ))}
                 <div className="border-t border-border my-2" />
-                <div className="flex gap-2 pt-1">
+                <div className="flex flex-col gap-2.5 pt-1">
                   {user ? (
-                    <Link to={`/${user.role}/dashboard`} onClick={() => setMobileMenuOpen(false)}
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 gradient-brand text-white rounded-xl text-sm font-semibold">
-                      Go to Dashboard <ArrowRight size={14} />
-                    </Link>
+                    <>
+                      <div className="flex items-center gap-2.5 text-xs text-muted-foreground px-3 py-2 bg-muted/40 border border-border rounded-xl">
+                        <div className="w-7 h-7 rounded-full gradient-brand flex items-center justify-center text-white font-bold text-xs overflow-hidden shadow-sm flex-shrink-0">
+                          {user.avatar ? (
+                            <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                          ) : (
+                            user.name.charAt(0)
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[10px] leading-none text-muted-foreground">Logged in as</p>
+                          <p className="text-xs font-bold text-foreground truncate mt-0.5">{user.name}</p>
+                        </div>
+                        <span className="text-[9px] uppercase font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full ml-auto inline-flex items-center gap-1 flex-shrink-0">
+                          {user.role === "admin" && <Shield size={9} />}
+                          {user.role === "teacher" && <GraduationCap size={9} />}
+                          {user.role === "student" && <BookOpen size={9} />}
+                          {user.role === "parent" && <Users size={9} />}
+                          {user.role === "librarian" && <BookMarked size={9} />}
+                          {user.role}
+                        </span>
+                      </div>
+                      <Link to={`/${user.role}/dashboard`} onClick={() => setMobileMenuOpen(false)}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 gradient-brand text-white rounded-xl text-sm font-semibold">
+                        Go to Dashboard <ArrowRight size={14} />
+                      </Link>
+                    </>
                   ) : (
                     <>
                       <Link to="/register" onClick={() => setMobileMenuOpen(false)}
@@ -400,12 +408,6 @@ export default function LandingPage() {
                       className="flex items-center gap-2 px-7 py-3.5 gradient-brand text-white font-bold rounded-2xl hover:opacity-90 transition-all shadow-xl shadow-indigo-500/30 text-sm animate-button">
                       {user ? "Go to Dashboard" : "Get Started Free"} <ArrowRight size={16} />
                     </Link>
-                    <button
-                      onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}
-                      className="flex items-center gap-2 px-7 py-3.5 bg-slate-200/50 dark:bg-white/8 backdrop-blur-sm border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white font-semibold rounded-2xl hover:bg-slate-200 dark:hover:bg-white/15 transition-all text-sm"
-                    >
-                      See Features
-                    </button>
                   </motion.div>
 
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}
@@ -495,97 +497,9 @@ export default function LandingPage() {
             </div>
           </section>
 
-          {/* ── FEATURES ── */}
-          <section id="features" className="py-20 lg:py-28">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-14">
-                <span className="inline-block bg-brand-50 dark:bg-brand-950/30 text-brand-600 dark:text-brand-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4 border border-brand-100 dark:border-brand-900">
-                  Platform Features
-                </span>
-                <h2 className="text-4xl font-bold text-foreground font-display mb-4">Everything Your College Needs</h2>
-                <p className="text-muted-foreground max-w-2xl mx-auto text-lg">From enrollment to graduation, CampusLink handles every aspect of college management with precision and intelligence.</p>
-              </motion.div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                {FEATURES.map((f, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }}
-                    className="group bg-card border border-border rounded-2xl p-6 hover:shadow-lg hover:-translate-y-1 transition-all cursor-default">
-                    <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center mb-4", f.bg)}>
-                      <f.icon size={22} className={f.color} />
-                    </div>
-                    <h3 className="font-bold text-foreground mb-2">{f.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </section>
 
-          {/* ── PRICING ── */}
-          <section id="pricing" className="py-20 lg:py-28">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-14">
-                <span className="inline-block bg-violet-50 dark:bg-violet-950/30 text-violet-600 dark:text-violet-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4 border border-violet-100 dark:border-violet-900">
-                  Pricing
-                </span>
-                <h2 className="text-4xl font-bold text-foreground font-display mb-4">Transparent, Flexible Pricing</h2>
-                <p className="text-muted-foreground max-w-xl mx-auto">Choose a plan that scales with your institution's needs.</p>
-              </motion.div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-                {PRICING.map((p, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                    className={cn("relative bg-card rounded-2xl p-7 border-2 transition-all hover:shadow-lg", p.color, i === 1 && "shadow-xl ring-2 ring-brand-500/20")}>
-                    {p.badge && (
-                      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-brand-500 to-violet-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-md">
-                        {p.badge}
-                      </div>
-                    )}
-                    <h3 className="text-xl font-bold text-foreground font-display mb-1">{p.plan}</h3>
-                    <p className="text-muted-foreground text-sm mb-4">{p.desc}</p>
-                    <div className="flex items-end gap-1 mb-6">
-                      <span className="text-4xl font-bold text-foreground font-display">{p.price}</span>
-                      {p.period && <span className="text-muted-foreground text-sm mb-1.5">{p.period}</span>}
-                    </div>
-                    <ul className="space-y-3 mb-7">
-                      {p.features.map((f, j) => (
-                        <li key={j} className="flex items-center gap-2.5 text-sm text-foreground">
-                          <CheckCircle2 size={15} className="text-emerald-500 flex-shrink-0" />
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
-                    {user ? (
-                      userPlan === p.plan ? (
-                        <button type="button" disabled className="block w-full text-center py-3 rounded-xl text-sm font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 cursor-default">
-                          Active Plan
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => setSelectedCheckoutPlan(p)}
-                          className={cn("block w-full text-center py-3 rounded-xl text-sm font-bold transition-all",
-                            i === 1
-                              ? "gradient-brand text-white hover:opacity-90 shadow-md animate-pulse-accent"
-                              : "border-2 border-border text-foreground hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400"
-                          )}
-                        >
-                          {p.plan === "Enterprise" ? "Contact Sales" : "Choose Plan"}
-                        </button>
-                      )
-                    ) : (
-                      <Link to="/register"
-                        className={cn("block w-full text-center py-3 rounded-xl text-sm font-bold transition-all",
-                          i === 1
-                            ? "gradient-brand text-white hover:opacity-90 shadow-md"
-                            : "border-2 border-border text-foreground hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400"
-                        )}>
-                        {p.plan === "Enterprise" ? "Contact Sales" : "Get Started"}
-                      </Link>
-                    )}
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </section>
+
+
 
           {/* ── TESTIMONIALS ── */}
           <section id="about" className="py-20 lg:py-28 bg-muted/30">
@@ -866,6 +780,71 @@ export default function LandingPage() {
               </div>
             )}
 
+            {pathname === "/pricing" && (
+              <div className="space-y-6">
+                <div className="text-center mb-8">
+                  <span className="inline-block bg-violet-50 dark:bg-violet-950/30 text-violet-600 dark:text-violet-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-3 border border-violet-100 dark:border-violet-900">
+                    Pricing Plans
+                  </span>
+                  <h2 className="text-3xl font-bold text-foreground font-display mb-2">Transparent, Flexible Pricing</h2>
+                  <p className="text-muted-foreground text-sm max-w-xl mx-auto">Choose a plan that scales with your institution's needs.</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto pt-4">
+                  {PRICING.map((p, i) => (
+                    <div key={i} className={cn("relative bg-card rounded-2xl p-7 border-2 transition-all hover:shadow-lg", p.color, i === 1 && "shadow-xl ring-2 ring-brand-500/20")}>
+                      {p.badge && (
+                        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-brand-500 to-violet-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-md">
+                          {p.badge}
+                        </div>
+                      )}
+                      <h3 className="text-xl font-bold text-foreground font-display mb-1">{p.plan}</h3>
+                      <p className="text-muted-foreground text-sm mb-4">{p.desc}</p>
+                      <div className="flex items-end gap-1 mb-6">
+                        <span className="text-4xl font-bold text-foreground font-display">{p.price}</span>
+                        {p.period && <span className="text-muted-foreground text-sm mb-1.5">{p.period}</span>}
+                      </div>
+                      <ul className="space-y-3 mb-7">
+                        {p.features.map((f, j) => (
+                          <li key={j} className="flex items-center gap-2.5 text-sm text-foreground">
+                            <CheckCircle2 size={15} className="text-emerald-500 flex-shrink-0" />
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+                      {user ? (
+                        userPlan === p.plan ? (
+                          <button type="button" disabled className="block w-full text-center py-3 rounded-xl text-sm font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 cursor-default">
+                            Active Plan
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedCheckoutPlan(p)}
+                            className={cn("block w-full text-center py-3 rounded-xl text-sm font-bold transition-all",
+                              i === 1
+                                ? "gradient-brand text-white hover:opacity-90 shadow-md animate-pulse-accent"
+                                : "border-2 border-border text-foreground hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400"
+                            )}
+                          >
+                            {p.plan === "Enterprise" ? "Contact Sales" : "Choose Plan"}
+                          </button>
+                        )
+                      ) : (
+                        <Link to="/register"
+                          className={cn("block w-full text-center py-3 rounded-xl text-sm font-bold transition-all",
+                            i === 1
+                              ? "gradient-brand text-white hover:opacity-90 shadow-md"
+                              : "border-2 border-border text-foreground hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400"
+                          )}>
+                          {p.plan === "Enterprise" ? "Contact Sales" : "Get Started"}
+                        </Link>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {pathname === "/contact" && (
               <div className="space-y-6">
                 <div className="text-center mb-8">
@@ -967,7 +946,7 @@ export default function LandingPage() {
       {/* ── FOOTER ── */}
       <footer className="bg-card border-t border-border pt-16 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
             {/* Brand */}
             <div className="lg:col-span-2">
               <Link to="/" className="flex items-center gap-2.5 mb-4">
@@ -990,49 +969,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Platform */}
-            <div>
-              <h4 className="text-sm font-bold text-foreground mb-4 uppercase tracking-wider">Platform</h4>
-              <ul className="space-y-2.5">
-                {FOOTER_PLATFORM.map(item => {
-                  let href = "/login";
-                  let onClick: any = undefined;
-                  if (item === "Features") {
-                    href = "/#features";
-                    onClick = (e: any) => {
-                      if (pathname === "/") {
-                        e.preventDefault();
-                        document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
-                      }
-                    };
-                  } else if (item === "Pricing") {
-                    href = "/#pricing";
-                    onClick = (e: any) => {
-                      if (pathname === "/") {
-                        e.preventDefault();
-                        document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
-                      }
-                    };
-                  } else {
-                    const roleMap: Record<string, string> = {
-                      "Parents": "parent",
-                      "Students": "student",
-                      "Teachers": "teacher",
-                      "Institute": "admin",
-                      "Librarian": "librarian"
-                    };
-                    href = `/login?role=${roleMap[item] || ""}`;
-                  }
-                  return (
-                    <li key={item}>
-                      <Link to={href} onClick={onClick} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                        {item}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+
 
             {/* Resources */}
             <div>
