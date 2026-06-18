@@ -7,7 +7,8 @@ import {
   Globe, TrendingUp, Calendar, Award, BookMarked, UserCheck,
   Layers, Sparkles, Play, ChevronDown, Building2, BookUser,
   DollarSign, Phone, Mail, FileText, HelpCircle, Briefcase,
-  Info, Lock, FileTerminal, Cpu, Newspaper, Compass, Users2, PlayCircle, Eye, Download, Presentation
+  Info, Lock, FileTerminal, Cpu, Newspaper, Compass, Users2, PlayCircle, Eye, Download, Presentation,
+  Search, Clock, Check
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,7 +24,7 @@ const RESOURCES_ITEMS = [
   { label: "Career Guidance", href: "/career", icon: Compass, desc: "Student career pathways" },
 ];
 
-const FOOTER_RESOURCES = ["Blog", "FAQ", "Tutors", "Community", "Scholarships", "Courses"];
+const FOOTER_RESOURCES = ["Blog", "FAQ", "Tutors", "Community", "Scholarships", "Courses", "Career Guidance"];
 const FOOTER_COMPANY = ["About Us", "Contact", "Privacy Policy", "Terms of Service"];
 
 
@@ -136,6 +137,33 @@ export default function LandingPage() {
   const [selectedArticle, setSelectedArticle] = useState<any | null>(null);
   const [selectedCheckoutPlan, setSelectedCheckoutPlan] = useState<any | null>(null);
   const userPlan = user?.plan || null;
+
+  // --- Tutors Subpage States ---
+  const [tutorSearch, setTutorSearch] = useState("");
+  const [selectedTutorDept, setSelectedTutorDept] = useState("All");
+  const [tutorInquiryName, setTutorInquiryName] = useState("");
+  const [tutorInquiryEmail, setTutorInquiryEmail] = useState("");
+  const [tutorInquiryTutor, setTutorInquiryTutor] = useState("");
+  const [tutorInquiryMsg, setTutorInquiryMsg] = useState("");
+
+  // --- Career Guidance States ---
+  const [activeCareerTrack, setActiveCareerTrack] = useState(0);
+
+  // --- FAQ States ---
+  const [faqSearch, setFaqSearch] = useState("");
+  const [faqOpenIndex, setFaqOpenIndex] = useState<Record<number, boolean>>({});
+  const [faqInquiryName, setFaqInquiryName] = useState("");
+  const [faqInquiryEmail, setFaqInquiryEmail] = useState("");
+  const [faqInquiryCategory, setFaqInquiryCategory] = useState("Technical");
+  const [faqInquiryMsg, setFaqInquiryMsg] = useState("");
+
+  // --- Courses States ---
+  const [coursesSearch, setCoursesSearch] = useState("");
+  const [selectedCourseSem, setSelectedCourseSem] = useState("All");
+  const [courseInquiryName, setCourseInquiryName] = useState("");
+  const [courseInquirySem, setCourseInquirySem] = useState("");
+  const [courseInquiryElective, setCourseInquiryElective] = useState("");
+  const [courseInquiryMsg, setCourseInquiryMsg] = useState("");
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 60);
@@ -621,89 +649,608 @@ export default function LandingPage() {
             )}
 
             {pathname === "/faq" && (
-              <div className="space-y-6">
-                <div className="text-center mb-8">
-                  <span className="inline-block bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-3 border border-indigo-100 dark:border-indigo-900">
+              <div className="space-y-12">
+                {/* Section 1: Page Header & Search */}
+                <div className="text-center">
+                  <span className="inline-block bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-3 border border-indigo-100 dark:border-indigo-900 shadow-sm">
                     FAQs
                   </span>
-                  <h1 className="text-3xl font-bold text-foreground font-display">Frequently Asked Questions</h1>
-                  <p className="text-muted-foreground text-sm mt-1">Common questions about the CampusLink college ERP platform</p>
+                  <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white font-display mb-2">Frequently Asked Questions</h1>
+                  <p className="text-muted-foreground text-sm max-w-lg mx-auto">Have questions about the CampusLink platform? Browse through our detailed FAQs or submit a support inquiry.</p>
+                  
+                  <div className="relative max-w-md mx-auto mt-6">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <input
+                      type="text"
+                      placeholder="Search FAQ articles..."
+                      value={faqSearch}
+                      onChange={(e) => setFaqSearch(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2.5 text-sm bg-card border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary shadow-sm"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-3">
-                  {[
-                    { q: "What is CampusLink?", a: "CampusLink is an AI-powered college ERP and Learning Management System designed to unify administrators, teachers, students, and parents." },
-                    { q: "How can parents get access to the portal?", a: "Parents are registered by the college administration. Once registered, they will receive login credentials to monitor attendance and grades." },
-                    { q: "Is the AI Assistant free to use for students?", a: "Yes! The AI assistant is a built-in feature designed to help students with questions, schedules, study plans, and performance analysis." },
-                    { q: "How secure is my data on the platform?", a: "We take security seriously. CampusLink utilizes end-to-end SSL encryption, role-based strict page route guards, and is fully ISO 27001 certified." }
-                  ].map((f, i) => (
-                    <div key={i} className="p-4 bg-card rounded-2xl border border-border shadow-card">
-                      <p className="font-semibold text-sm text-foreground">{f.q}</p>
-                      <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{f.a}</p>
+
+                {/* Section 2: General Platform FAQs */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 pb-2 border-b border-border">
+                    <Shield className="w-5 h-5 text-indigo-500" />
+                    <h2 className="text-lg font-bold text-foreground">General Platform & Access</h2>
+                  </div>
+                  <div className="space-y-3">
+                    {[
+                      { id: 1, q: "What is CampusLink and who is it for?", a: "CampusLink is an AI-powered next-generation college ERP and Learning Management System designed to unify administrators, teachers, students, and parents onto one single secure portal." },
+                      { id: 2, q: "How do I get my login credentials?", a: "Credentials are created and managed by your college administration office. Students, teachers, and parents will receive registration details via email once approved." },
+                      { id: 3, q: "Is there a mobile app available?", a: "CampusLink is built as a fully responsive web application, meaning it operates smoothly and feels native on all iOS, Android, and tablet browsers without installing external packages." }
+                    ].filter(f => f.q.toLowerCase().includes(faqSearch.toLowerCase()) || f.a.toLowerCase().includes(faqSearch.toLowerCase())).map((f) => (
+                      <div key={f.id} className="p-4 bg-card rounded-2xl border border-border shadow-sm text-left">
+                        <button
+                          onClick={() => setFaqOpenIndex(prev => ({ ...prev, [f.id]: !prev[f.id] }))}
+                          className="w-full flex justify-between items-center text-left font-semibold text-sm text-foreground hover:text-primary transition-colors"
+                        >
+                          <span>{f.q}</span>
+                          <ChevronDown size={14} className={cn("transition-transform duration-200", faqOpenIndex[f.id] && "rotate-180")} />
+                        </button>
+                        {(!faqSearch || faqOpenIndex[f.id]) && (
+                          <p className="text-xs text-muted-foreground mt-2 leading-relaxed border-t border-border/40 pt-2">{f.a}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section 3: Academic & Admissions FAQs */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 pb-2 border-b border-border">
+                    <GraduationCap className="w-5 h-5 text-indigo-500" />
+                    <h2 className="text-lg font-bold text-foreground">Academic Cycles & Grade Cards</h2>
+                  </div>
+                  <div className="space-y-3">
+                    {[
+                      { id: 4, q: "When are attendance percentage levels updated?", a: "Faculty members mark attendance digitally after every class hour. The students' and parents' dashboards update percentage bars in real-time." },
+                      { id: 5, q: "How are mid-semester grades calculated?", a: "Mid-semester grading aggregates assignment score sheets, mock exams, and quiz components in accordance with college credit weighting guidelines." },
+                      { id: 6, q: "Can elective course registrations be updated?", a: "Yes, elective subjects can be modified during the initial 2 weeks of the semester via the student portal under core course list settings." }
+                    ].filter(f => f.q.toLowerCase().includes(faqSearch.toLowerCase()) || f.a.toLowerCase().includes(faqSearch.toLowerCase())).map((f) => (
+                      <div key={f.id} className="p-4 bg-card rounded-2xl border border-border shadow-sm text-left">
+                        <button
+                          onClick={() => setFaqOpenIndex(prev => ({ ...prev, [f.id]: !prev[f.id] }))}
+                          className="w-full flex justify-between items-center text-left font-semibold text-sm text-foreground hover:text-primary transition-colors"
+                        >
+                          <span>{f.q}</span>
+                          <ChevronDown size={14} className={cn("transition-transform duration-200", faqOpenIndex[f.id] && "rotate-180")} />
+                        </button>
+                        {(!faqSearch || faqOpenIndex[f.id]) && (
+                          <p className="text-xs text-muted-foreground mt-2 leading-relaxed border-t border-border/40 pt-2">{f.a}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section 4: Technical & Security FAQs */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 pb-2 border-b border-border">
+                    <Lock className="w-5 h-5 text-indigo-500" />
+                    <h2 className="text-lg font-bold text-foreground">Technical Specifications & Security</h2>
+                  </div>
+                  <div className="space-y-3">
+                    {[
+                      { id: 7, q: "What data encryption standards are used?", a: "All communication is routed over SSL. Core student records and grades database columns are encrypted at rest under AES-256 protocols." },
+                      { id: 8, q: "Is the AI Assistant compliance checked?", a: "Yes, our integrated AI helpers use restricted model outputs aligned with university study guidelines, preserving academic integrity." }
+                    ].filter(f => f.q.toLowerCase().includes(faqSearch.toLowerCase()) || f.a.toLowerCase().includes(faqSearch.toLowerCase())).map((f) => (
+                      <div key={f.id} className="p-4 bg-card rounded-2xl border border-border shadow-sm text-left">
+                        <button
+                          onClick={() => setFaqOpenIndex(prev => ({ ...prev, [f.id]: !prev[f.id] }))}
+                          className="w-full flex justify-between items-center text-left font-semibold text-sm text-foreground hover:text-primary transition-colors"
+                        >
+                          <span>{f.q}</span>
+                          <ChevronDown size={14} className={cn("transition-transform duration-200", faqOpenIndex[f.id] && "rotate-180")} />
+                        </button>
+                        {(!faqSearch || faqOpenIndex[f.id]) && (
+                          <p className="text-xs text-muted-foreground mt-2 leading-relaxed border-t border-border/40 pt-2">{f.a}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section 5: Direct Support Helpdesk Contact Form */}
+                <div className="bg-card border border-border rounded-2xl p-6 shadow-md text-left">
+                  <div className="flex items-center gap-2 mb-4">
+                    <MessageSquare className="w-5 h-5 text-indigo-500" />
+                    <div>
+                      <h3 className="font-bold text-sm text-foreground">Submit Helpdesk Ticket</h3>
+                      <p className="text-xs text-muted-foreground">Can't find your answers? Raise a priority ticket directly to administration support.</p>
                     </div>
-                  ))}
+                  </div>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    toast.success("Helpdesk ticket submitted successfully! Check your email for status responses.");
+                    setFaqInquiryName("");
+                    setFaqInquiryEmail("");
+                    setFaqInquiryMsg("");
+                  }} className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-muted-foreground uppercase mb-1">Your Name</label>
+                        <input
+                          type="text"
+                          placeholder="John Doe"
+                          value={faqInquiryName}
+                          onChange={(e) => setFaqInquiryName(e.target.value)}
+                          className="w-full px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary text-foreground"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-muted-foreground uppercase mb-1">Your Email</label>
+                        <input
+                          type="email"
+                          placeholder="john@example.com"
+                          value={faqInquiryEmail}
+                          onChange={(e) => setFaqInquiryEmail(e.target.value)}
+                          className="w-full px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary text-foreground"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-muted-foreground uppercase mb-1">Inquiry Category</label>
+                      <select
+                        value={faqInquiryCategory}
+                        onChange={(e) => setFaqInquiryCategory(e.target.value)}
+                        className="w-full px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary text-foreground"
+                      >
+                        <option value="Technical">Technical & Login Issues</option>
+                        <option value="Academic">Academics & Courses</option>
+                        <option value="Billing">Fee Payments & Invoices</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-muted-foreground uppercase mb-1">Detailed Message</label>
+                      <textarea
+                        rows={3}
+                        placeholder="Please outline your issue in detail..."
+                        value={faqInquiryMsg}
+                        onChange={(e) => setFaqInquiryMsg(e.target.value)}
+                        className="w-full px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary resize-none text-foreground"
+                        required
+                      />
+                    </div>
+                    <button type="submit" className="w-full py-2.5 gradient-brand text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity shadow-sm">
+                      Submit Ticket
+                    </button>
+                  </form>
                 </div>
               </div>
             )}
 
             {pathname === "/tutors" && (
-              <div className="space-y-6">
-                <div className="text-center mb-8">
-                  <span className="inline-block bg-violet-50 dark:bg-violet-950/30 text-violet-600 dark:text-violet-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-3 border border-violet-100 dark:border-violet-900">
+              <div className="space-y-12">
+                {/* Section 1: Page Header & Dynamic Search / Filters */}
+                <div className="text-center">
+                  <span className="inline-block bg-violet-50 dark:bg-violet-950/30 text-violet-600 dark:text-violet-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-3 border border-violet-100 dark:border-violet-900 shadow-sm">
                     Tutors
                   </span>
-                  <h1 className="text-3xl font-bold text-foreground font-display">Verified Campus Tutors</h1>
-                  <p className="text-muted-foreground text-sm mt-1">Department professors available for academic sessions</p>
+                  <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white font-display mb-2">Expert Campus Tutors</h1>
+                  <p className="text-muted-foreground text-sm max-w-lg mx-auto">Get connected with experienced department professors for dedicated subject counseling, remedial labs, and research advice.</p>
+                  
+                  <div className="flex flex-col sm:flex-row items-center gap-3 justify-center mt-6">
+                    <div className="relative w-full sm:max-w-xs">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                      <input
+                        type="text"
+                        placeholder="Search by name or skill..."
+                        value={tutorSearch}
+                        onChange={(e) => setTutorSearch(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2 text-xs bg-card border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary shadow-sm"
+                      />
+                    </div>
+                    <div className="flex gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+                      {["All", "Computer Science", "Mathematics", "Electronics"].map((dept) => (
+                        <button
+                          key={dept}
+                          onClick={() => setSelectedTutorDept(dept)}
+                          className={cn(
+                            "px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap",
+                            selectedTutorDept === dept
+                              ? "bg-brand-600 text-white dark:bg-brand-500"
+                              : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                          )}
+                        >
+                          {dept}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
+
+                {/* Section 2: Featured Tutors Directory */}
                 <div className="space-y-4">
-                  {[
-                    { name: "Dr. Anand Kumar", dept: "Computer Science", spec: "Data Structures, Algorithms", time: "Mon, Wed, Fri 4:00 - 5:00 PM", initial: "A", color: "bg-sky-500" },
-                    { name: "Prof. Meera Iyer", dept: "Mathematics", spec: "Calculus, Linear Algebra", time: "Tue, Thu 3:00 - 4:30 PM", initial: "M", color: "bg-violet-500" },
-                    { name: "Mr. Ravi Shankar", dept: "Electronics", spec: "Digital Logic, Microprocessors", time: "Mon, Thu 2:00 - 3:30 PM", initial: "R", color: "bg-emerald-500" },
-                    { name: "Mr. Kartik Verma", dept: "Computer Science", spec: "Web Development, DBMS", time: "Wed, Fri 1:30 - 3:00 PM", initial: "K", color: "bg-amber-500" }
-                  ].map((t, i) => (
-                    <div key={i} className="flex items-start gap-4 p-4 bg-card rounded-2xl border border-border shadow-card animate-slide-up">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base ${t.color} flex-shrink-0 shadow-sm`}>
-                        {t.initial}
+                  <div className="flex items-center gap-2 pb-2 border-b border-border">
+                    <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+                    <h2 className="text-lg font-bold text-foreground">Featured Professors</h2>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {[
+                      { name: "Dr. Anand Kumar", dept: "Computer Science", spec: "Data Structures, Algorithms", time: "Mon, Wed, Fri 4:00 - 5:00 PM", initial: "A", color: "bg-sky-500", rating: 4.9, reviews: 120 },
+                      { name: "Prof. Meera Iyer", dept: "Mathematics", spec: "Calculus, Linear Algebra", time: "Tue, Thu 3:00 - 4:30 PM", initial: "M", color: "bg-violet-500", rating: 4.8, reviews: 98 },
+                      { name: "Mr. Ravi Shankar", dept: "Electronics", spec: "Digital Logic, Microprocessors", time: "Mon, Thu 2:00 - 3:30 PM", initial: "R", color: "bg-emerald-500", rating: 4.7, reviews: 75 },
+                      { name: "Mr. Kartik Verma", dept: "Computer Science", spec: "Web Development, DBMS", time: "Wed, Fri 1:30 - 3:00 PM", initial: "K", color: "bg-amber-500", rating: 4.9, reviews: 88 }
+                    ]
+                      .filter(t => (selectedTutorDept === "All" || t.dept === selectedTutorDept))
+                      .filter(t => (t.name.toLowerCase().includes(tutorSearch.toLowerCase()) || t.spec.toLowerCase().includes(tutorSearch.toLowerCase())))
+                      .map((t, i) => (
+                        <div key={i} className="flex items-start gap-4 p-4 bg-card rounded-2xl border border-border shadow-card hover:border-primary/45 transition-colors text-left">
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base ${t.color} flex-shrink-0 shadow-sm`}>
+                            {t.initial}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-1">
+                              <p className="font-semibold text-sm text-slate-900 dark:text-white truncate">{t.name}</p>
+                              <span className="flex items-center gap-0.5 text-[10px] text-amber-500 font-bold shrink-0">
+                                <Star size={10} className="fill-amber-500" /> {t.rating}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-muted-foreground font-medium">{t.dept} Dept</p>
+                            <p className="text-xs text-foreground mt-2"><strong>Specializes in:</strong> {t.spec}</p>
+                            <p className="text-[10px] text-primary mt-1"><strong>Availability:</strong> {t.time}</p>
+                            <button
+                              onClick={() => {
+                                setTutorInquiryTutor(t.name);
+                                document.getElementById("booking-form")?.scrollIntoView({ behavior: "smooth" });
+                              }}
+                              className="mt-3 text-[10px] bg-brand-50 hover:bg-brand-100 text-brand-700 dark:bg-brand-950 dark:hover:bg-brand-900 dark:text-brand-300 px-3 py-1.5 rounded-lg font-bold border border-brand-100 dark:border-brand-900 transition-colors w-full"
+                            >
+                              Request Booking
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Section 3: Department Specializations Directory */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 pb-2 border-b border-border">
+                    <Layers className="w-5 h-5 text-indigo-500" />
+                    <h2 className="text-lg font-bold text-foreground">Department Research & Labs</h2>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+                    <div className="p-4 bg-muted/40 rounded-xl border border-border">
+                      <p className="font-bold text-xs text-foreground animate-fade">AI & Computation Lab</p>
+                      <p className="text-[10px] text-muted-foreground mt-1 leading-relaxed">Focus on machine vision algorithms, NLP modeling architectures, and deep neural arrays.</p>
+                    </div>
+                    <div className="p-4 bg-muted/40 rounded-xl border border-border">
+                      <p className="font-bold text-xs text-foreground animate-fade">Advanced Mathematics Cell</p>
+                      <p className="text-[10px] text-muted-foreground mt-1 leading-relaxed">Research in multivariable systems, calculus modeling, statistics, and cryptographic algebra.</p>
+                    </div>
+                    <div className="p-4 bg-muted/40 rounded-xl border border-border">
+                      <p className="font-bold text-xs text-foreground animate-fade">Micro-processing & VLSI Hub</p>
+                      <p className="text-[10px] text-muted-foreground mt-1 leading-relaxed">Integrated chip designs, digital signal interfaces, micro-controllers, and sensor arrays.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 4: Tutoring Guidelines & Code of Conduct */}
+                <div className="bg-card border border-border rounded-2xl p-5 text-left">
+                  <div className="flex items-center gap-2 mb-3 pb-2 border-b border-border/50">
+                    <BookUser className="w-5 h-5 text-indigo-500" />
+                    <h3 className="font-bold text-sm text-foreground">Session Guidelines & Honor Code</h3>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div className="space-y-2">
+                      <p className="flex items-start gap-2 text-muted-foreground">
+                        <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                        <span>Sessions are limited to 45 minutes of academic query resolution.</span>
+                      </p>
+                      <p className="flex items-start gap-2 text-muted-foreground">
+                        <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                        <span>Students must outline queries or share syllabus documents in advance.</span>
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="flex items-start gap-2 text-muted-foreground">
+                        <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                        <span>Rescheduling requires a 24-hour notice to prevent missing slot counts.</span>
+                      </p>
+                      <p className="flex items-start gap-2 text-muted-foreground">
+                        <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                        <span>Remedial credits will be recorded in student performance matrices.</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 5: Booking Inquiry Form */}
+                <div id="booking-form" className="bg-card border border-border rounded-2xl p-6 shadow-md text-left">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Calendar className="w-5 h-5 text-indigo-500" />
+                    <div>
+                      <h3 className="font-bold text-sm text-foreground">Request Mentorship Booking</h3>
+                      <p className="text-xs text-muted-foreground">Submit a reservation to schedule a dedicated counseling slot with your professor.</p>
+                    </div>
+                  </div>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    toast.success(`Booking request sent to ${tutorInquiryTutor || "the selected professor"} successfully!`);
+                    setTutorInquiryName("");
+                    setTutorInquiryEmail("");
+                    setTutorInquiryTutor("");
+                    setTutorInquiryMsg("");
+                  }} className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-muted-foreground uppercase mb-1">Your Name</label>
+                        <input
+                          type="text"
+                          placeholder="Your Name"
+                          value={tutorInquiryName}
+                          onChange={(e) => setTutorInquiryName(e.target.value)}
+                          className="w-full px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary text-foreground"
+                          required
+                        />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-base text-foreground leading-snug">{t.name}</p>
-                        <p className="text-xs text-muted-foreground">{t.dept} Department</p>
-                        <p className="text-xs text-foreground mt-2"><strong>Specializes in:</strong> {t.spec}</p>
-                        <p className="text-[11px] text-primary mt-1"><strong>Availability:</strong> {t.time}</p>
+                      <div>
+                        <label className="block text-[10px] font-bold text-muted-foreground uppercase mb-1">Your Email</label>
+                        <input
+                          type="email"
+                          placeholder="Your Email"
+                          value={tutorInquiryEmail}
+                          onChange={(e) => setTutorInquiryEmail(e.target.value)}
+                          className="w-full px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary text-foreground"
+                          required
+                        />
                       </div>
                     </div>
-                  ))}
+                    <div>
+                      <label className="block text-[10px] font-bold text-muted-foreground uppercase mb-1">Select Professor</label>
+                      <select
+                        value={tutorInquiryTutor}
+                        onChange={(e) => setTutorInquiryTutor(e.target.value)}
+                        className="w-full px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary text-foreground"
+                        required
+                      >
+                        <option value="">-- Choose Professor --</option>
+                        <option value="Dr. Anand Kumar">Dr. Anand Kumar (Computer Science)</option>
+                        <option value="Prof. Meera Iyer">Prof. Meera Iyer (Mathematics)</option>
+                        <option value="Mr. Ravi Shankar">Mr. Ravi Shankar (Electronics)</option>
+                        <option value="Mr. Kartik Verma">Mr. Kartik Verma (Computer Science)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-muted-foreground uppercase mb-1">Topic details / Questions</label>
+                      <textarea
+                        rows={3}
+                        placeholder="State what subject or topic you need assistance with..."
+                        value={tutorInquiryMsg}
+                        onChange={(e) => setTutorInquiryMsg(e.target.value)}
+                        className="w-full px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary resize-none text-foreground"
+                        required
+                      />
+                    </div>
+                    <button type="submit" className="w-full py-2.5 gradient-brand text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity shadow-sm">
+                      Submit Request
+                    </button>
+                  </form>
                 </div>
               </div>
             )}
 
             {pathname === "/courses" && (
-              <div className="space-y-6">
-                <div className="text-center mb-8">
-                  <span className="inline-block bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-3 border border-amber-100 dark:border-amber-900">
+              <div className="space-y-12">
+                {/* Section 1: Page Header & Semester/Search Filters */}
+                <div className="text-center">
+                  <span className="inline-block bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-3 border border-amber-100 dark:border-amber-900 shadow-sm">
                     Courses
                   </span>
-                  <h1 className="text-3xl font-bold text-foreground font-display">CampusLink Key Subjects</h1>
-                  <p className="text-muted-foreground text-sm mt-1">Core engineering and sciences subjects available in the curriculum</p>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {[
-                    { code: "CS301", title: "Data Structures & Algorithms", credits: 4, sem: 5, desc: "Fundamental data structures and algorithm design." },
-                    { code: "CS302", title: "Database Management Systems", credits: 3, sem: 5, desc: "Relational design, normalization, SQL, indexing." },
-                    { code: "CS401", title: "Web Development", credits: 3, sem: 7, desc: "Modern full-stack web applications with React & Node." },
-                    { code: "EC301", title: "Digital Electronics", credits: 3, sem: 5, desc: "Combinational and sequential logic circuit design." },
-                    { code: "PH101", title: "Engineering Physics", credits: 3, sem: 1, desc: "Wave mechanics, optics, and quantum basics." },
-                    { code: "MA301", title: "Engineering Mathematics III", credits: 4, sem: 5, desc: "Calculus, linear algebra, and complex variables." }
-                  ].map((c, i) => (
-                    <div key={i} className="p-4 bg-card rounded-2xl border border-border flex flex-col justify-between hover:border-primary/40 transition-colors shadow-card">
-                      <div>
-                        <span className="text-[10px] bg-primary/10 text-primary font-bold px-2 py-0.5 rounded-full uppercase">{c.code} • {c.credits} Credits</span>
-                        <h4 className="font-bold text-base text-foreground mt-2 leading-snug">{c.title}</h4>
-                        <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{c.desc}</p>
-                      </div>
-                      <p className="text-[10px] text-muted-foreground mt-3 font-medium">Semester {c.sem}</p>
+                  <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white font-display mb-2">CampusLink Key Subjects</h1>
+                  <p className="text-muted-foreground text-sm max-w-lg mx-auto">Browse through our accredited degree modules, credit allocations, and required pre-requisites for technical semesters.</p>
+                  
+                  <div className="flex flex-col sm:flex-row items-center gap-3 justify-center mt-6">
+                    <div className="relative w-full sm:max-w-xs">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                      <input
+                        type="text"
+                        placeholder="Search course title or code..."
+                        value={coursesSearch}
+                        onChange={(e) => setCoursesSearch(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2 text-xs bg-card border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary shadow-sm"
+                      />
                     </div>
-                  ))}
+                    <div className="flex gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+                      {["All", "Semester 1", "Semester 5", "Semester 7"].map((sem) => (
+                        <button
+                          key={sem}
+                          onClick={() => setSelectedCourseSem(sem)}
+                          className={cn(
+                            "px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap",
+                            selectedCourseSem === sem
+                              ? "bg-brand-600 text-white dark:bg-brand-500"
+                              : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                          )}
+                        >
+                          {sem}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 2: Core Curriculum Subjects Grid */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 pb-2 border-b border-border">
+                    <BookOpen className="w-5 h-5 text-amber-500" />
+                    <h2 className="text-lg font-bold text-foreground">Curriculum List</h2>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {[
+                      { code: "CS301", title: "Data Structures & Algorithms", credits: 4, sem: "Semester 5", desc: "Fundamental data structures, search tree systems, hashing, and complex algorithm design patterns." },
+                      { code: "CS302", title: "Database Management Systems", credits: 3, sem: "Semester 5", desc: "Relational model designs, normal forms, transaction logging, SQL parsing, and B-Tree indexing." },
+                      { code: "CS401", title: "Web Development", credits: 3, sem: "Semester 7", desc: "Modern full-stack responsive web systems built with React libraries, TS modules, and Node.js databases." },
+                      { code: "EC301", title: "Digital Electronics", credits: 3, sem: "Semester 5", desc: "Combinational gates, sequential flip-flops, register maps, counter designs, and logic chips." },
+                      { code: "PH101", title: "Engineering Physics", credits: 3, sem: "Semester 1", desc: "Quantum theory equations, wave mechanics, fiber optics grids, and electromagnetic vector analysis." },
+                      { code: "MA301", title: "Engineering Mathematics III", credits: 4, sem: "Semester 5", desc: "Fourier series equations, Laplace transforms, linear algebra vectors, and probability calculations." }
+                    ]
+                      .filter(c => (selectedCourseSem === "All" || c.sem === selectedCourseSem))
+                      .filter(c => (c.title.toLowerCase().includes(coursesSearch.toLowerCase()) || c.code.toLowerCase().includes(coursesSearch.toLowerCase())))
+                      .map((c, i) => (
+                        <div key={i} className="p-4 bg-card rounded-2xl border border-border flex flex-col justify-between hover:border-primary/45 transition-colors shadow-card text-left">
+                          <div>
+                            <span className="text-[10px] bg-primary/10 text-primary font-bold px-2 py-0.5 rounded-full uppercase">{c.code} • {c.credits} Credits</span>
+                            <h4 className="font-bold text-sm text-foreground mt-2 leading-snug">{c.title}</h4>
+                            <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{c.desc}</p>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground mt-3 font-semibold text-left border-t border-border/30 pt-2">{c.sem}</p>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Section 3: Credits & Syllabus Distribution */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 pb-2 border-b border-border">
+                    <TrendingUp className="w-5 h-5 text-indigo-500" />
+                    <h2 className="text-lg font-bold text-foreground">Syllabus & Credit Allocation Rules</h2>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+                    <div className="p-4 bg-muted/40 rounded-xl border border-border">
+                      <p className="font-bold text-xs text-foreground">Elective Selection</p>
+                      <p className="text-[10px] text-muted-foreground mt-1 leading-relaxed">Students pick 2 electives in odd semesters. Selection closes within 14 calendar days of batch startup.</p>
+                    </div>
+                    <div className="p-4 bg-muted/40 rounded-xl border border-border">
+                      <p className="font-bold text-xs text-foreground">Lab-Course Credits</p>
+                      <p className="text-[10px] text-muted-foreground mt-1 leading-relaxed">Practical classes hold a 1.5 credit ratio. Mandatory 75% attendance applies to lab submissions.</p>
+                    </div>
+                    <div className="p-4 bg-muted/40 rounded-xl border border-border">
+                      <p className="font-bold text-xs text-foreground">Project Submissions</p>
+                      <p className="text-[10px] text-muted-foreground mt-1 leading-relaxed">Final semester major projects yield 6 credits. Projects require peer review and a faculty board review.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 4: Academic Grading Guidelines */}
+                <div className="bg-card border border-border rounded-2xl p-5 text-left">
+                  <div className="flex items-center gap-2 mb-3 pb-2 border-b border-border/50">
+                    <Award className="w-5 h-5 text-indigo-500" />
+                    <h3 className="font-bold text-sm text-foreground">Official Academic Grading System</h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs text-muted-foreground">
+                      <thead>
+                        <tr className="border-b border-border text-foreground font-bold">
+                          <th className="py-2">Letter Grade</th>
+                          <th className="py-2">Score Range (%)</th>
+                          <th className="py-2">Grade Points</th>
+                          <th className="py-2">Classification</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border/40">
+                        <tr>
+                          <td className="py-2 font-bold text-emerald-500">O</td>
+                          <td className="py-2">90 - 100</td>
+                          <td className="py-2">10</td>
+                          <td className="py-2">Outstanding</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 font-bold text-primary">A+</td>
+                          <td className="py-2">80 - 89</td>
+                          <td className="py-2">9</td>
+                          <td className="py-2">Excellent</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 font-bold text-indigo-400">A</td>
+                          <td className="py-2">70 - 79</td>
+                          <td className="py-2">8</td>
+                          <td className="py-2">Very Good</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 font-bold text-foreground">B+</td>
+                          <td className="py-2">60 - 69</td>
+                          <td className="py-2">7</td>
+                          <td className="py-2">Good</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 text-rose-500 font-bold">F</td>
+                          <td className="py-2">Below 40</td>
+                          <td className="py-2">0</td>
+                          <td className="py-2">Fail</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Section 5: Syllabus Counselor / Elective Form */}
+                <div className="bg-card border border-border rounded-2xl p-6 shadow-md text-left">
+                  <div className="flex items-center gap-2 mb-4">
+                    <FileText className="w-5 h-5 text-indigo-500" />
+                    <div>
+                      <h3 className="font-bold text-sm text-foreground">Curricular Advising & Counselor Form</h3>
+                      <p className="text-xs text-muted-foreground">Need advice on choosing electives or request syllabus modifications? Send an entry here.</p>
+                    </div>
+                  </div>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    toast.success("Advising request submitted! An academic counselor will contact you shortly.");
+                    setCourseInquiryName("");
+                    setCourseInquirySem("");
+                    setCourseInquiryElective("");
+                    setCourseInquiryMsg("");
+                  }} className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-muted-foreground uppercase mb-1">Your Name</label>
+                        <input
+                          type="text"
+                          placeholder="Your Name"
+                          value={courseInquiryName}
+                          onChange={(e) => setCourseInquiryName(e.target.value)}
+                          className="w-full px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary text-foreground"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-muted-foreground uppercase mb-1">Current Semester</label>
+                        <select
+                          value={courseInquirySem}
+                          onChange={(e) => setCourseInquirySem(e.target.value)}
+                          className="w-full px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary text-foreground"
+                          required
+                        >
+                          <option value="">-- Choose Sem --</option>
+                          <option value="1">Semester 1</option>
+                          <option value="3">Semester 3</option>
+                          <option value="5">Semester 5</option>
+                          <option value="7">Semester 7</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-muted-foreground uppercase mb-1">Preferred Subject/Elective Area</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Advanced Cryptography or Machine Learning"
+                        value={courseInquiryElective}
+                        onChange={(e) => setCourseInquiryElective(e.target.value)}
+                        className="w-full px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary text-foreground"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-muted-foreground uppercase mb-1">Counselor Questions</label>
+                      <textarea
+                        rows={3}
+                        placeholder="State your goals or queries about credits/syllabus..."
+                        value={courseInquiryMsg}
+                        onChange={(e) => setCourseInquiryMsg(e.target.value)}
+                        className="w-full px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-primary resize-none text-foreground"
+                        required
+                      />
+                    </div>
+                    <button type="submit" className="w-full py-2.5 gradient-brand text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity shadow-sm">
+                      Submit Advising Request
+                    </button>
+                  </form>
                 </div>
               </div>
             )}
@@ -724,7 +1271,7 @@ export default function LandingPage() {
                     { channel: "#campus-life", count: 1200, desc: "General announcements, cultural events, sports meet details, and campus stories." },
                     { channel: "#alumni-connect", count: 650, desc: "Mentorship channels connecting recent graduates with industry leaders." }
                   ].map((c, i) => (
-                    <div key={i} className="p-4 bg-card rounded-2xl border border-border shadow-card hover:bg-muted/10 transition-colors">
+                    <div key={i} className="p-4 bg-card rounded-2xl border border-border shadow-card hover:bg-muted/10 transition-colors text-left">
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="font-semibold text-sm text-foreground">{c.channel}</span>
                         <span className="text-[10px] bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-400 font-bold px-2.5 py-0.5 rounded-full">{c.count} members</span>
@@ -751,7 +1298,7 @@ export default function LandingPage() {
                     { name: "Need-Based Financial Assistance", waiver: "Up to 100% Waiver", criteria: "Annual family income < ₹3,00,000", deadline: "June 30, 2026" },
                     { name: "Sports Excellence Grant", waiver: "25% Waiver", criteria: "State or National level representation", deadline: "August 01, 2026" }
                   ].map((s, i) => (
-                    <div key={i} className="p-4 bg-card rounded-2xl border border-border shadow-card">
+                    <div key={i} className="p-4 bg-card rounded-2xl border border-border shadow-card text-left">
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="font-bold text-sm text-foreground">{s.name}</h4>
                         <span className="text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 font-bold px-2.5 py-0.5 rounded-full">{s.waiver}</span>
@@ -765,17 +1312,108 @@ export default function LandingPage() {
             )}
 
             {pathname === "/about" && (
-              <div className="space-y-6">
-                <div className="text-center mb-8">
-                  <span className="inline-block bg-violet-50 dark:bg-violet-950/30 text-violet-600 dark:text-violet-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-3 border border-violet-100 dark:border-violet-900">
+              <div className="space-y-12 text-left">
+                {/* Section 1: Page Header */}
+                <div className="text-center">
+                  <span className="inline-block bg-violet-50 dark:bg-violet-950/30 text-violet-600 dark:text-violet-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-3 border border-violet-100 dark:border-violet-900 shadow-sm">
                     About Us
                   </span>
-                  <h1 className="text-3xl font-bold text-foreground font-display">About CampusLink</h1>
-                  <p className="text-muted-foreground text-sm mt-1">Our mission and values in shaping educational institutions</p>
+                  <h1 className="text-3xl sm:text-4xl font-bold text-foreground font-display mb-2">About CampusLink</h1>
+                  <p className="text-muted-foreground text-sm max-w-lg mx-auto">A modern digital ecosystem connecting students, faculty, administrators, and families.</p>
                 </div>
-                <div className="space-y-4 text-sm text-foreground/80 leading-relaxed bg-card border border-border rounded-2xl p-6 shadow-card">
-                  <p>CampusLink is a leading college management ERP platform designed from the ground up to solve administrative, teacher, student, and parent collaboration gaps. Our platform empowers more than 50 educational complexes to streamline attendance reports, schedule examinations, library issuing, fee payouts, and academic grade cards in real time.</p>
-                  <p>We believe that clean, unified, and AI-enabled design brings families closer to academic growth. By automating structural audits and communication blocks, we save hours for teaching staffs, allowing them to perform high-impact instruction.</p>
+
+                {/* Section 2: Core Mission & Platform Overview */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+                  <div className="space-y-4 text-sm text-foreground/85 leading-relaxed">
+                    <p>CampusLink is a leading college management ERP platform designed from the ground up to solve administrative, teacher, student, and parent collaboration gaps.</p>
+                    <p>Our platform empowers educational complexes to streamline attendance reports, schedule examinations, library issuing, fee payouts, and academic grade cards in real time.</p>
+                    <p>We believe that clean, unified, and AI-enabled design brings families closer to academic growth. By automating structural audits and communication blocks, we save hours for teaching staffs, allowing them to focus on high-impact instruction.</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-muted/40 rounded-xl border border-border text-center animate-fade">
+                      <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">50+</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mt-1">Colleges Unified</p>
+                    </div>
+                    <div className="p-4 bg-muted/40 rounded-xl border border-border text-center animate-fade">
+                      <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">100k+</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mt-1">Active Portals</p>
+                    </div>
+                    <div className="p-4 bg-muted/40 rounded-xl border border-border text-center animate-fade">
+                      <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">99.9%</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mt-1">SLA Uptime</p>
+                    </div>
+                    <div className="p-4 bg-muted/40 rounded-xl border border-border text-center animate-fade">
+                      <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">14ms</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mt-1">Average Latency</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 3: Platform Value Pillars */}
+                <div className="space-y-4">
+                  <h2 className="text-lg font-bold text-foreground border-b border-border pb-2">Our Core Value Pillars</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="p-5 bg-card border border-border rounded-2xl shadow-sm space-y-2">
+                      <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center animate-fade">
+                        <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      <h3 className="font-semibold text-sm text-foreground">Security First</h3>
+                      <p className="text-xs text-muted-foreground leading-relaxed">Full database encryption, route guards, compliance backups, and ISO 27001 data certifications protect user data.</p>
+                    </div>
+                    <div className="p-5 bg-card border border-border rounded-2xl shadow-sm space-y-2">
+                      <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center animate-fade">
+                        <Users2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      <h3 className="font-semibold text-sm text-foreground">Real-time Collaboration</h3>
+                      <p className="text-xs text-muted-foreground leading-relaxed">Instant notifications, notice board publishes, and dedicated messaging portals align parents and teachers.</p>
+                    </div>
+                    <div className="p-5 bg-card border border-border rounded-2xl shadow-sm space-y-2">
+                      <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center animate-fade">
+                        <BarChart3 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      <h3 className="font-semibold text-sm text-foreground">Advanced Analytics</h3>
+                      <p className="text-xs text-muted-foreground leading-relaxed">Live performance dashboard cards, attendance alerts, predictive grades tracking, and automated schedules.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 4: Leadership Team Profiles */}
+                <div className="space-y-4">
+                  <h2 className="text-lg font-bold text-foreground border-b border-border pb-2">Leadership Team</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {[
+                      { name: "Dr. Pradeep Srivastava", title: "Institute Director", desc: "Leading the strategy, operational workflows, and corporate growth programs across 50 college campuses.", avatar: "P" },
+                      { name: "Dr. S. K. Gupta", title: "Dean of Academics", desc: "Enforcing grading integrity standards, credit structures, scheduling parameters, and syllabus development.", avatar: "S" },
+                      { name: "Prof. Shalini Sen", title: "Head of IT Services", desc: "Spearheading server integrations, cloud-based latency control, database upgrades, and security protocols.", avatar: "S" }
+                    ].map((l, i) => (
+                      <div key={i} className="p-5 bg-card border border-border rounded-2xl shadow-sm space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full gradient-brand flex items-center justify-center text-white font-bold shrink-0">
+                            {l.avatar}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-sm text-foreground leading-tight">{l.name}</h4>
+                            <p className="text-[10px] text-primary font-bold mt-0.5">{l.title}</p>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{l.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section 5: Official Accreditations & Partners */}
+                <div className="bg-card border border-border rounded-2xl p-5">
+                  <div className="flex items-center gap-2 mb-3 pb-2 border-b border-border/50">
+                    <Award className="w-5 h-5 text-indigo-500" />
+                    <h3 className="font-bold text-sm text-foreground">Accreditations & Certificates</h3>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="text-[10px] font-bold bg-muted text-muted-foreground border border-border/80 px-3 py-1.5 rounded-lg">NAAC A++ Alignment</span>
+                    <span className="text-[10px] font-bold bg-muted text-muted-foreground border border-border/80 px-3 py-1.5 rounded-lg">AICTE ERP Standards</span>
+                    <span className="text-[10px] font-bold bg-muted text-muted-foreground border border-border/80 px-3 py-1.5 rounded-lg">ISO 27001 Certified</span>
+                    <span className="text-[10px] font-bold bg-muted text-muted-foreground border border-border/80 px-3 py-1.5 rounded-lg">GDPR Compliant</span>
+                  </div>
                 </div>
               </div>
             )}
@@ -783,13 +1421,13 @@ export default function LandingPage() {
             {pathname === "/pricing" && (
               <div className="space-y-6">
                 <div className="text-center mb-8">
-                  <span className="inline-block bg-violet-50 dark:bg-violet-950/30 text-violet-600 dark:text-violet-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-3 border border-violet-100 dark:border-violet-900">
+                  <span className="inline-block bg-violet-50 dark:bg-violet-950/30 text-violet-600 dark:text-violet-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-3 border border-violet-100 dark:border-violet-900 animate-fade">
                     Pricing Plans
                   </span>
                   <h2 className="text-3xl font-bold text-foreground font-display mb-2">Transparent, Flexible Pricing</h2>
                   <p className="text-muted-foreground text-sm max-w-xl mx-auto">Choose a plan that scales with your institution's needs.</p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto pt-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto pt-4 text-left">
                   {PRICING.map((p, i) => (
                     <div key={i} className={cn("relative bg-card rounded-2xl p-7 border-2 transition-all hover:shadow-lg", p.color, i === 1 && "shadow-xl ring-2 ring-brand-500/20")}>
                       {p.badge && (
@@ -806,7 +1444,7 @@ export default function LandingPage() {
                       <ul className="space-y-3 mb-7">
                         {p.features.map((f, j) => (
                           <li key={j} className="flex items-center gap-2.5 text-sm text-foreground">
-                            <CheckCircle2 size={15} className="text-emerald-500 flex-shrink-0" />
+                            <CheckCircle2 size={15} className="text-emerald-500 flex-shrink-0 animate-fade" />
                             {f}
                           </li>
                         ))}
@@ -854,7 +1492,7 @@ export default function LandingPage() {
                   <h1 className="text-3xl font-bold text-foreground font-display">Get in Touch</h1>
                   <p className="text-muted-foreground text-sm mt-1">We would love to hear from you or schedule a live platform demo</p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-card border border-border rounded-2xl p-6 shadow-card">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-card border border-border rounded-2xl p-6 shadow-card text-left">
                   <div>
                     <h3 className="font-bold text-sm text-foreground mb-3">Office Location</h3>
                     <p className="text-xs text-muted-foreground leading-relaxed">
@@ -870,9 +1508,9 @@ export default function LandingPage() {
                     </p>
                   </div>
                   <form onSubmit={(e) => { e.preventDefault(); toast.success("Message sent successfully!"); }} className="space-y-3">
-                    <input placeholder="Your Name" className="w-full px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-ring" required />
-                    <input type="email" placeholder="Your Email" className="w-full px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-ring" required />
-                    <textarea rows={3} placeholder="Your Message" className="w-full px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-ring resize-none" required />
+                    <input placeholder="Your Name" className="w-full px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-ring text-foreground" required />
+                    <input type="email" placeholder="Your Email" className="w-full px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-ring text-foreground" required />
+                    <textarea rows={3} placeholder="Your Message" className="w-full px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-ring resize-none text-foreground" required />
                     <button type="submit" className="w-full py-2 gradient-brand text-white rounded-xl text-xs font-bold hover:opacity-90">Send Message</button>
                   </form>
                 </div>
@@ -888,7 +1526,7 @@ export default function LandingPage() {
                   <h1 className="text-3xl font-bold text-foreground font-display">Privacy Policy</h1>
                   <p className="text-muted-foreground text-sm mt-1">Last updated: June 17, 2026</p>
                 </div>
-                <div className="space-y-4 text-sm text-foreground/80 leading-relaxed bg-card border border-border rounded-2xl p-6 shadow-card">
+                <div className="space-y-4 text-sm text-foreground/80 leading-relaxed bg-card border border-border rounded-2xl p-6 shadow-card text-left">
                   <p>At CampusLink, we value the confidentiality of student records, grades, and parent communication channels. This privacy policy describes the types of information we collect and compile, our encryption standards, and your rights in controlling stored user data.</p>
                   <p>All database tables are saved securely with role-based access restrictions. We do not sell, disclose, or distribute audit logs or contact sheets to external third-party agencies.</p>
                 </div>
@@ -904,7 +1542,7 @@ export default function LandingPage() {
                   <h1 className="text-3xl font-bold text-foreground font-display">Terms of Service</h1>
                   <p className="text-muted-foreground text-sm mt-1">Last updated: June 17, 2026</p>
                 </div>
-                <div className="space-y-4 text-sm text-foreground/80 leading-relaxed bg-card border border-border rounded-2xl p-6 shadow-card">
+                <div className="space-y-4 text-sm text-foreground/80 leading-relaxed bg-card border border-border rounded-2xl p-6 shadow-card text-left">
                   <p>Welcome to CampusLink. By using our hosted ERP portals, databases, or AI tools, you represent and agree to abide by our institutional code of conduct, acceptable academic integrity rules, and database compliance policies.</p>
                   <p>Violation of access rules, reverse engineering, or attempting unauthorized route bypasses will result in immediate termination of the user profile and administrative follow-up.</p>
                 </div>
@@ -912,30 +1550,187 @@ export default function LandingPage() {
             )}
 
             {pathname === "/career" && (
-              <div className="space-y-6">
-                <div className="text-center mb-8">
-                  <span className="inline-block bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-3 border border-emerald-100 dark:border-emerald-900">
+              <div className="space-y-12 text-left animate-slide-up">
+                {/* Section 1: Page Header */}
+                <div className="text-center">
+                  <span className="inline-block bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-3 border border-emerald-100 dark:border-emerald-900 shadow-sm">
                     Career Guidance
                   </span>
-                  <h1 className="text-3xl font-bold text-foreground font-display">Student Career Pathways</h1>
-                  <p className="text-muted-foreground text-sm mt-1">Recommended tracks and key capabilities for engineering, analytics, and networks</p>
+                  <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white font-display mb-2">Student Career Pathways</h1>
+                  <p className="text-muted-foreground text-sm max-w-lg mx-auto">Explore recommended industry career paths, mapping technologies, and statistics for placements.</p>
                 </div>
+
+                {/* Section 2: Key Career Tracks (Interactive) */}
                 <div className="space-y-4">
-                  {[
-                    { track: "Full Stack Web Engineering", skills: "React, TypeScript, Node.js, DSA, System Design", courses: "CS401 Web Development, CS301 Data Structures", desc: "Focuses on building modern, scalable responsive interfaces and reliable back-end databases." },
-                    { track: "Data Science & AI Analyst", skills: "Python, Machine Learning, Applied Calculus, DBMS", courses: "CS302 Database Systems, MA301 Engineering Math", desc: "Focuses on statistical modeling, data visualization, predictive analytics, and machine learning structures." },
-                    { track: "Computer Networking & Cybersecurity", skills: "ISO/OSI model, Cryptography, Firewalls, TCP/IP", courses: "CS301 Data Structures, Computer Networks (CS-Shelf)", desc: "Focuses on network administration, secure information channels, encryption protocols, and server routing." }
-                  ].map((c, i) => (
-                    <div key={i} className="p-5 bg-card rounded-2xl border border-border hover:border-primary/40 transition-colors shadow-card">
-                      <span className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold px-2.5 py-0.5 rounded-full uppercase">Career Pathway</span>
-                      <h4 className="font-bold text-base text-foreground mt-3 leading-snug">{c.track}</h4>
-                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{c.desc}</p>
-                      <div className="mt-4 text-xs space-y-1 bg-muted/30 p-3 rounded-xl border border-border/45">
-                        <p><strong>Required Skills:</strong> <span className="text-muted-foreground">{c.skills}</span></p>
-                        <p><strong>Recommended Courses:</strong> <span className="text-primary font-medium">{c.courses}</span></p>
+                  <div className="flex items-center gap-2 pb-2 border-b border-border">
+                    <Compass className="w-5 h-5 text-emerald-500" />
+                    <h2 className="text-lg font-bold text-foreground">Interactive Pathway Map</h2>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {[
+                      "Full Stack Web Engineering",
+                      "Data Science & AI Analyst",
+                      "Computer Networking & Cybersecurity"
+                    ].map((trackName, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setActiveCareerTrack(i)}
+                        className={cn(
+                          "px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors",
+                          activeCareerTrack === i
+                            ? "bg-emerald-600 border-emerald-600 text-white dark:bg-emerald-500 dark:border-emerald-500"
+                            : "bg-card border-border hover:bg-muted text-muted-foreground"
+                        )}
+                      >
+                        {trackName}
+                      </button>
+                    ))}
+                  </div>
+
+                  <AnimatePresence mode="wait">
+                    {activeCareerTrack === 0 && (
+                      <motion.div
+                        key="web"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="p-5 bg-card rounded-2xl border border-border shadow-card"
+                      >
+                        <span className="text-[9px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full uppercase animate-fade">Development Track</span>
+                        <h3 className="font-bold text-base text-foreground mt-3">Full Stack Web Engineering</h3>
+                        <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">Web engineers construct premium, scalable responsive web interfaces and databases. You will develop capabilities using React frameworks, TypeScript scripting, server routing protocols, and database normalizations.</p>
+                        <div className="mt-4 text-xs space-y-1.5 bg-muted/40 p-3.5 rounded-xl border border-border/50">
+                          <p><strong>Primary Frameworks:</strong> <span className="text-muted-foreground">React, TypeScript, Node.js, Express, TailwindCSS</span></p>
+                          <p><strong>Target Courses:</strong> <span className="text-primary font-medium">CS401 Web Development, CS301 Data Structures</span></p>
+                        </div>
+                      </motion.div>
+                    )}
+                    {activeCareerTrack === 1 && (
+                      <motion.div
+                        key="ai"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="p-5 bg-card rounded-2xl border border-border shadow-card"
+                      >
+                        <span className="text-[9px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full uppercase animate-fade">Intelligence Track</span>
+                        <h3 className="font-bold text-base text-foreground mt-3">Data Science & AI Analyst</h3>
+                        <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">Data scientists structure statistical algorithms and model predictive trends. Key modules focus on statistical equations, vector spaces, machine learning loops, and database queries.</p>
+                        <div className="mt-4 text-xs space-y-1.5 bg-muted/40 p-3.5 rounded-xl border border-border/50">
+                          <p><strong>Primary Languages:</strong> <span className="text-muted-foreground">Python, R, SQL, Pandas, PyTorch, Scikit-learn</span></p>
+                          <p><strong>Target Courses:</strong> <span className="text-primary font-medium">CS302 Database Systems, MA301 Engineering Math</span></p>
+                        </div>
+                      </motion.div>
+                    )}
+                    {activeCareerTrack === 2 && (
+                      <motion.div
+                        key="net"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="p-5 bg-card rounded-2xl border border-border shadow-card"
+                      >
+                        <span className="text-[9px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full uppercase animate-fade">Security Track</span>
+                        <h3 className="font-bold text-base text-foreground mt-3">Computer Networking & Cybersecurity</h3>
+                        <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">Network security architects secure server communications and restrict intrusion vectors. Students learn cryptology protocols, packet routing, firewalls, and ISO/OSI structures.</p>
+                        <div className="mt-4 text-xs space-y-1.5 bg-muted/40 p-3.5 rounded-xl border border-border/50">
+                          <p><strong>Primary Tools:</strong> <span className="text-muted-foreground">Wireshark, Linux Shell, OpenSSL, TCP/IP, Router Configurations</span></p>
+                          <p><strong>Target Courses:</strong> <span className="text-primary font-medium">CS301 Data Structures, Computer Networks (CS-Shelf)</span></p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Section 3: Core Skills Required Matrix */}
+                <div className="space-y-4">
+                  <h2 className="text-lg font-bold text-foreground border-b border-border pb-2">Skills Capability Matrix</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="p-4 bg-muted/40 rounded-xl border border-border">
+                      <p className="font-bold text-xs text-slate-800 dark:text-slate-200 animate-fade">System Design & DSA</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">Fundamental arrays, hashing, graph searching, and scaling strategies for server configurations.</p>
+                    </div>
+                    <div className="p-4 bg-muted/40 rounded-xl border border-border">
+                      <p className="font-bold text-xs text-slate-800 dark:text-slate-200 animate-fade">Relational Database Parsing</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">Normalizing schema matrices, indexing columns, SQL querying, and database backup protocols.</p>
+                    </div>
+                    <div className="p-4 bg-muted/40 rounded-xl border border-border">
+                      <p className="font-bold text-xs text-slate-800 dark:text-slate-200 animate-fade">Secure Protocol Management</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">Managing SSL certificates, configuring firewalls, user role guards, and encryption at rest.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 4: Placement Statistics Overview */}
+                <div className="space-y-4">
+                  <h2 className="text-lg font-bold text-foreground border-b border-border pb-2">Placement Rates & Package Metrics</h2>
+                  <div className="bg-card border border-border rounded-2xl p-5 space-y-4 shadow-sm">
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span className="text-slate-700 dark:text-slate-300">Engineering Placements</span>
+                        <span className="text-primary">94.8% Rate</span>
+                      </div>
+                      <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
+                        <div className="h-full gradient-brand rounded-full" style={{ width: "94.8%" }} />
                       </div>
                     </div>
-                  ))}
+                    
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span className="text-slate-700 dark:text-slate-300">Data Science Placements</span>
+                        <span className="text-primary">89.2% Rate</span>
+                      </div>
+                      <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
+                        <div className="h-full gradient-brand rounded-full" style={{ width: "89.2%" }} />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2.5 pt-3 border-t border-border/50 text-center">
+                      <div>
+                        <p className="text-base font-bold text-foreground">₹8.5 LPA</p>
+                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Average Package</p>
+                      </div>
+                      <div>
+                        <p className="text-base font-bold text-foreground">₹32 LPA</p>
+                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Highest Package</p>
+                      </div>
+                      <div>
+                        <p className="text-base font-bold text-foreground">120+</p>
+                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Hiring Companies</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 5: Alumni Placements & Success Stories */}
+                <div className="space-y-4">
+                  <h2 className="text-lg font-bold text-foreground border-b border-border pb-2">Alumni Success Stories</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-4 bg-card border border-border rounded-xl shadow-sm space-y-2">
+                      <p className="text-xs text-muted-foreground italic leading-relaxed">"The project-based curriculum structure of CampusLink helped me gain hands-on practice. Picking Web Engineering as my path led directly to my engineer role."</p>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full gradient-brand flex items-center justify-center text-white text-xs font-bold shrink-0">
+                          S
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-foreground">Siddharth Sen</p>
+                          <p className="text-[9px] text-muted-foreground">Software Engineer at Google</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-card border border-border rounded-xl shadow-sm space-y-2">
+                      <p className="text-xs text-muted-foreground italic leading-relaxed">"Analyzing database systems under the professors guided me during my placements. I strongly recommend Data Science to analytics enthusiasts."</p>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full gradient-brand flex items-center justify-center text-white text-xs font-bold shrink-0">
+                          K
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-foreground">Kriti Sharma</p>
+                          <p className="text-[9px] text-muted-foreground">Data Analyst at Microsoft</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -982,7 +1777,8 @@ export default function LandingPage() {
                     "Tutors": "/tutors",
                     "Community": "/community",
                     "Scholarships": "/scholarships",
-                    "Courses": "/courses"
+                    "Courses": "/courses",
+                    "Career Guidance": "/career"
                   };
                   const path = keyMap[item] || "/";
                   return (
