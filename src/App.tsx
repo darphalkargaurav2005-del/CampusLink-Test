@@ -108,6 +108,7 @@ function AppRoutes() {
       <Route path="/features/results" element={<RoleProtectedRoute feature="results"><LandingPage /></RoleProtectedRoute>} />
 
       {/* Primary Multi-Tab Resource Public Routes */}
+      <Route path="/resources" element={<LandingPage />} />
       <Route path="/resources/academic-calendar/:tab" element={<LandingPage />} />
       <Route path="/resources/notices/:tab" element={<LandingPage />} />
       <Route path="/resources/events/:tab" element={<LandingPage />} />
@@ -136,6 +137,7 @@ function AppRoutes() {
         <Route path="courses" element={<CourseManagement />} />
         <Route path="teacher-assignment" element={<TeacherAssignment />} />
         <Route path="fees" element={<FeeManagement />} />
+        <Route path="library" element={<LibrarianDashboard />} />
         <Route path="teacher-attendance" element={<TeacherAttendance />} />
         <Route path="teacher-schedule" element={<TeacherSchedule />} />
         <Route path="notices" element={<NoticeBoard role="admin" />} />

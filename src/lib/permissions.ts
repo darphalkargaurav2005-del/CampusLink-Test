@@ -20,8 +20,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, FeatureKey[]> = {
     "courses",
   ],
   teacher: [
-    "teacher-management",
-    "attendance",
     "results",
     "courses",
   ],
@@ -33,7 +31,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, FeatureKey[]> = {
     "results",
   ],
   librarian: [
-    "library",
+    "courses",
   ],
 };
 

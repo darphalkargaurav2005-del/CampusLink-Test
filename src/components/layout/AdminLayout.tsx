@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, GraduationCap, UserCog, UserCheck, BookOpen, BookCopy, ClipboardList, Wallet, CalendarCheck, Calendar, Bell, BarChart3, Bot, MessageSquare, Settings, History } from "lucide-react";
+import { LayoutDashboard, Users, GraduationCap, UserCog, UserCheck, BookOpen, BookCopy, ClipboardList, Wallet, CalendarCheck, Calendar, Bell, BarChart3, Bot, MessageSquare, Settings, History, BookCheck } from "lucide-react";
 import Sidebar, { type NavItem } from "./Sidebar";
 import Navbar from "./Navbar";
 import Breadcrumb from "./Breadcrumb";
@@ -15,6 +15,7 @@ const navItems: NavItem[] = [
   { label: "Course Management", path: "/admin/courses", icon: BookCopy },
   { label: "Teacher Assignment", path: "/admin/teacher-assignment", icon: ClipboardList },
   { label: "Fee Management", path: "/admin/fees", icon: Wallet },
+  { label: "Library Management", path: "/admin/library", icon: BookCheck },
   { label: "Teacher Attendance", path: "/admin/teacher-attendance", icon: CalendarCheck },
   { label: "Teacher Schedule", path: "/admin/teacher-schedule", icon: Calendar },
   { label: "Notice Board", path: "/admin/notices", icon: Bell },
