@@ -77,30 +77,55 @@ import LibraryReports from "@/pages/librarian/LibraryReports";
 import LandingPage from "@/pages/LandingPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
 import NotFound from "@/pages/NotFound";
-import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
+import { ProtectedRoute, RoleProtectedRoute } from "@/components/layout/ProtectedRoute";
 
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
-      <Route path="/blog" element={<LandingPage />} />
-      <Route path="/faq" element={<LandingPage />} />
+      <Route path="/blog" element={<Navigate to="/resources/blog/education-news" replace />} />
+      <Route path="/faq" element={<Navigate to="/resources/help-center/faq" replace />} />
       <Route path="/tutors" element={<LandingPage />} />
-      <Route path="/courses" element={<LandingPage />} />
-      <Route path="/community" element={<LandingPage />} />
-      <Route path="/scholarships" element={<LandingPage />} />
+      <Route path="/courses" element={<RoleProtectedRoute feature="courses"><LandingPage /></RoleProtectedRoute>} />
+      <Route path="/community" element={<Navigate to="/resources/community/student-discussions" replace />} />
+      <Route path="/scholarships" element={<Navigate to="/resources/scholarships/government-scholarships" replace />} />
       <Route path="/about" element={<LandingPage />} />
       <Route path="/contact" element={<LandingPage />} />
       <Route path="/privacy" element={<LandingPage />} />
       <Route path="/terms" element={<LandingPage />} />
-      <Route path="/career" element={<LandingPage />} />
+      <Route path="/career" element={<Navigate to="/resources/career/career-counseling" replace />} />
       <Route path="/pricing" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
+      {/* New Feature Public Routes */}
+      <Route path="/features/student-management" element={<RoleProtectedRoute feature="student-management"><LandingPage /></RoleProtectedRoute>} />
+      <Route path="/features/teacher-management" element={<RoleProtectedRoute feature="teacher-management"><LandingPage /></RoleProtectedRoute>} />
+      <Route path="/features/attendance" element={<RoleProtectedRoute feature="attendance"><LandingPage /></RoleProtectedRoute>} />
+      <Route path="/features/library" element={<RoleProtectedRoute feature="library"><LandingPage /></RoleProtectedRoute>} />
+      <Route path="/features/fees" element={<RoleProtectedRoute feature="fees"><LandingPage /></RoleProtectedRoute>} />
+      <Route path="/features/results" element={<RoleProtectedRoute feature="results"><LandingPage /></RoleProtectedRoute>} />
+
+      {/* Primary Multi-Tab Resource Public Routes */}
+      <Route path="/resources/academic-calendar/:tab" element={<LandingPage />} />
+      <Route path="/resources/notices/:tab" element={<LandingPage />} />
+      <Route path="/resources/events/:tab" element={<LandingPage />} />
+      <Route path="/resources/scholarships/:tab" element={<LandingPage />} />
+      <Route path="/resources/career/:tab" element={<LandingPage />} />
+      <Route path="/resources/help-center/:tab" element={<LandingPage />} />
+      <Route path="/resources/blog/:tab" element={<LandingPage />} />
+      <Route path="/resources/community/:tab" element={<LandingPage />} />
+
+      {/* New Legal Public Routes */}
+      <Route path="/cookie-policy" element={<LandingPage />} />
+      <Route path="/security-policy" element={<LandingPage />} />
+
+      {/* Public Dashboard Entry */}
+      <Route path="/dashboard" element={<LandingPage />} />
+
       {/* Admin Routes */}
-      <Route path="/admin" element={<ProtectedRoute role="admin"><AdminLayout /></ProtectedRoute>}>
+      <Route path="/admin" element={<RoleProtectedRoute allowedRoles={["admin"]}><AdminLayout /></RoleProtectedRoute>}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="users" element={<UserManagement />} />
@@ -122,7 +147,7 @@ function AppRoutes() {
       </Route>
 
       {/* Teacher Routes */}
-      <Route path="/teacher" element={<ProtectedRoute role="teacher"><TeacherLayout /></ProtectedRoute>}>
+      <Route path="/teacher" element={<RoleProtectedRoute allowedRoles={["teacher"]}><TeacherLayout /></RoleProtectedRoute>}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<TeacherDashboard />} />
         <Route path="attendance" element={<DigitalAttendance />} />
@@ -140,7 +165,7 @@ function AppRoutes() {
       </Route>
 
       {/* Student Routes */}
-      <Route path="/student" element={<ProtectedRoute role="student"><StudentLayout /></ProtectedRoute>}>
+      <Route path="/student" element={<RoleProtectedRoute allowedRoles={["student"]}><StudentLayout /></RoleProtectedRoute>}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<StudentDashboard />} />
         <Route path="attendance" element={<AttendanceReport />} />
@@ -158,7 +183,7 @@ function AppRoutes() {
       </Route>
 
       {/* Parent Routes */}
-      <Route path="/parent" element={<ProtectedRoute role="parent"><ParentLayout /></ProtectedRoute>}>
+      <Route path="/parent" element={<RoleProtectedRoute allowedRoles={["parent"]}><ParentLayout /></RoleProtectedRoute>}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<ParentDashboard />} />
         <Route path="attendance" element={<ChildAttendance />} />
@@ -174,7 +199,7 @@ function AppRoutes() {
       </Route>
 
       {/* Librarian Routes */}
-      <Route path="/librarian" element={<ProtectedRoute role="librarian"><LibrarianLayout /></ProtectedRoute>}>
+      <Route path="/librarian" element={<RoleProtectedRoute allowedRoles={["librarian"]}><LibrarianLayout /></RoleProtectedRoute>}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<LibrarianDashboard />} />
         <Route path="books" element={<Books />} />

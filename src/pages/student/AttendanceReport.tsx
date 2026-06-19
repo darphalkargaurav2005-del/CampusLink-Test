@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import PageHeader from "@/components/features/PageHeader";
 import ChartCard from "@/components/features/ChartCard";
-import { ANALYTICS_ATTENDANCE } from "@/constants/mockData";
 import { cn } from "@/lib/utils";
 
 const COURSE_ATTENDANCE = [
@@ -15,38 +14,44 @@ const COURSE_ATTENDANCE = [
 ];
 
 const MONTHLY = [
-  { month: "Aug", present: 22, absent: 2, total: 24 },
-  { month: "Sep", present: 24, absent: 2, total: 26 },
-  { month: "Oct", present: 21, absent: 5, total: 26 },
-  { month: "Nov", present: 23, absent: 3, total: 26 },
-  { month: "Dec", present: 19, absent: 5, total: 24 },
-  { month: "Jan", present: 25, absent: 1, total: 26 },
-  { month: "Feb", present: 20, absent: 3, total: 23 },
+  { month: "Aug", present: 22, absent: 2, late: 0, total: 24 },
+  { month: "Sep", present: 24, absent: 2, late: 1, total: 26 },
+  { month: "Oct", present: 21, absent: 5, late: 2, total: 26 },
+  { month: "Nov", present: 23, absent: 3, late: 0, total: 26 },
+  { month: "Dec", present: 19, absent: 5, late: 1, total: 24 },
+  { month: "Jan", present: 25, absent: 1, late: 0, total: 26 },
+  { month: "Feb", present: 20, absent: 3, late: 0, total: 23 },
 ];
 
 export default function AttendanceReport() {
-  const overall = Math.round((COURSE_ATTENDANCE.reduce((a, c) => a + c.present, 0) / COURSE_ATTENDANCE.reduce((a, c) => a + c.total, 0)) * 100);
+  const totalClasses = COURSE_ATTENDANCE.reduce((a, c) => a + c.total, 0);
+  const presentClasses = COURSE_ATTENDANCE.reduce((a, c) => a + c.present, 0);
+  const missedClasses = COURSE_ATTENDANCE.reduce((a, c) => a + (c.total - c.present), 0) - 4; // present + missed + late = total
+  const lateClasses = 4;
+  
+  const overall = Math.round((presentClasses / totalClasses) * 100);
 
   return (
     <div>
-      <PageHeader title="Attendance Report" subtitle="Your detailed attendance records across all courses" />
+      <PageHeader title="My Attendance" subtitle="Your detailed personal attendance records across all courses" />
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
         {[
-          { label: "Overall Attendance", value: `${overall}%`, color: overall >= 75 ? "text-emerald-600" : "text-rose-600" },
-          { label: "Total Classes", value: COURSE_ATTENDANCE.reduce((a, c) => a + c.total, 0), color: "text-foreground" },
-          { label: "Classes Attended", value: COURSE_ATTENDANCE.reduce((a, c) => a + c.present, 0), color: "text-foreground" },
-          { label: "Classes Missed", value: COURSE_ATTENDANCE.reduce((a, c) => a + (c.total - c.present), 0), color: "text-rose-600" },
+          { label: "Overall Attendance", value: `${overall}%`, color: overall >= 75 ? "text-emerald-600 animate-pulse" : "text-rose-600" },
+          { label: "Total Classes", value: totalClasses, color: "text-foreground" },
+          { label: "Classes Attended", value: presentClasses, color: "text-emerald-600" },
+          { label: "Classes Missed", value: missedClasses, color: "text-rose-600" },
+          { label: "Classes Late", value: lateClasses, color: "text-amber-500" },
         ].map((s, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }} className="bg-card border border-border rounded-xl p-4 text-center shadow-card">
             <p className={cn("text-2xl font-bold font-display", s.color)}>{s.value}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{s.label}</p>
+            <p className="text-[10px] text-muted-foreground font-semibold mt-0.5">{s.label}</p>
           </motion.div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <ChartCard title="Monthly Attendance" subtitle="Present vs Absent each month" index={0}>
+        <ChartCard title="Monthly Attendance Trends" subtitle="Classes Attended, Late vs Absent" index={0}>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={MONTHLY}>
               <defs>
@@ -61,6 +66,7 @@ export default function AttendanceReport() {
               <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "10px", fontSize: "12px" }} />
               <Area type="monotone" dataKey="present" stroke="#10b981" strokeWidth={2} fill="url(#pres)" name="Present" />
               <Area type="monotone" dataKey="absent" stroke="#f43f5e" strokeWidth={2} fill="transparent" name="Absent" />
+              <Area type="monotone" dataKey="late" stroke="#f59e0b" strokeWidth={2} fill="transparent" name="Late" />
             </AreaChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -70,8 +76,8 @@ export default function AttendanceReport() {
             {COURSE_ATTENDANCE.map((c, i) => (
               <div key={i}>
                 <div className="flex justify-between text-xs mb-1.5">
-                  <span className="text-muted-foreground truncate">{c.course}</span>
-                  <span className={cn("font-semibold ml-2", c.pct >= 75 ? "text-emerald-600" : "text-rose-600")}>{c.pct}%</span>
+                  <span className="text-muted-foreground truncate font-medium">{c.course}</span>
+                  <span className={cn("font-bold ml-2", c.pct >= 75 ? "text-emerald-600" : "text-rose-600")}>{c.pct}% ({c.present}/{c.total})</span>
                 </div>
                 <div className="h-2 bg-muted rounded-full overflow-hidden">
                   <motion.div
@@ -88,7 +94,7 @@ export default function AttendanceReport() {
       </div>
 
       {overall < 75 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900 rounded-xl p-4 text-sm text-rose-700 dark:text-rose-400">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900 rounded-xl p-4 text-sm text-rose-700 dark:text-rose-400 font-medium">
           Your overall attendance is below 75%. You may not be eligible to appear for examinations. Please contact your class teacher immediately.
         </motion.div>
       )}

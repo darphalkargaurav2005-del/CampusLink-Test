@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -55,6 +55,7 @@ export default function LoginPage() {
   const { login, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const roleParam = searchParams.get("role");
   const [showPassword, setShowPassword] = useState(false);
@@ -62,9 +63,10 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (user) {
-      navigate(`/${user.role}/dashboard`, { replace: true });
+      const fromPath = location.state?.from;
+      navigate(fromPath || `/${user.role}/dashboard`, { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, navigate, location.state]);
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -99,8 +101,10 @@ export default function LoginPage() {
       return;
     }
     toast.success(`Welcome back, ${user.name.split(" ")[0]}!`);
-    login(user, data.remember);
+    const fromPath = location.state?.from;
+    login(user, data.remember, fromPath);
   };
+
 
   return (
     <div className="min-h-screen flex bg-background">

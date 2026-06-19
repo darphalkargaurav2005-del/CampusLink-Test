@@ -8,20 +8,43 @@ import {
   Layers, Sparkles, Play, ChevronDown, Building2, BookUser,
   DollarSign, Phone, Mail, FileText, HelpCircle, Briefcase,
   Info, Lock, FileTerminal, Cpu, Newspaper, Compass, Users2, PlayCircle, Eye, Download, Presentation,
-  Search, Clock, Check
+  Search, Clock, Check,
+  Twitter, Github, Linkedin, Facebook, Instagram
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { hasPermission, type FeatureKey } from "@/lib/permissions";
+import { ROLE_DASHBOARD_PATHS } from "@/lib/auth";
 import heroCampus from "@/assets/hero-campus.png";
 import Modal from "@/components/features/Modal";
 import { toast } from "sonner";
 
+// Import custom public subpages
+import StudentManagementFeature from "./public/StudentManagementFeature";
+import TeacherManagementFeature from "./public/TeacherManagementFeature";
+import AttendanceFeature from "./public/AttendanceFeature";
+import LibraryFeature from "./public/LibraryFeature";
+import FeesFeature from "./public/FeesFeature";
+import ResultsFeature from "./public/ResultsFeature";
+import CookiePolicyPage from "./public/CookiePolicyPage";
+import SecurityPolicyPage from "./public/SecurityPolicyPage";
+
+// Import refactored resources components
+import AcademicCalendarResource from "./public/AcademicCalendarResource";
+import EventsResource from "./public/EventsResource";
+import NoticesResource from "./public/NoticesResource";
+import HelpCenterResource from "./public/HelpCenterResource";
+import ScholarshipsResource from "./public/ScholarshipsResource";
+import CareerResource from "./public/CareerResource";
+import BlogResource from "./public/BlogResource";
+import CommunityResource from "./public/CommunityResource";
+
 /* ─── NAV DATA ─────────────────────────────────────────── */
 const RESOURCES_ITEMS = [
-  { label: "Blog", href: "/blog", icon: Newspaper, desc: "Latest news & updates" },
-  { label: "FAQ", href: "/faq", icon: HelpCircle, desc: "Frequently asked questions" },
-  { label: "Career Guidance", href: "/career", icon: Compass, desc: "Student career pathways" },
+  { label: "Blog", href: "/resources/blog/education-news", icon: Newspaper, desc: "Latest news & updates" },
+  { label: "FAQ", href: "/resources/help-center/faq", icon: HelpCircle, desc: "Frequently asked questions" },
+  { label: "Career Guidance", href: "/resources/career/career-counseling", icon: Compass, desc: "Student career pathways" },
 ];
 
 const FOOTER_RESOURCES = ["Blog", "FAQ", "Tutors", "Community", "Scholarships", "Courses", "Career Guidance"];
@@ -127,9 +150,48 @@ function NavDropdown({
 /* ─── MAIN COMPONENT ──────────────────────────────────── */
 export default function LandingPage() {
   const { theme, toggleTheme } = useTheme();
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
+
+  const handleFeatureClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+    e.preventDefault();
+
+    const featureMap: Record<string, FeatureKey> = {
+      "/features/student-management": "student-management",
+      "/features/teacher-management": "teacher-management",
+      "/features/attendance": "attendance",
+      "/features/library": "library",
+      "/features/fees": "fees",
+      "/features/results": "results",
+      "/courses": "courses"
+    };
+
+    const feature = featureMap[path];
+    if (!feature) {
+      navigate(path);
+      return;
+    }
+
+    if (!isAuthenticated || !user) {
+      if (path.includes("attendance")) {
+        toast.error("Please login to continue.");
+      } else {
+        toast.error("Please login to access this feature.");
+      }
+      navigate("/login", { state: { from: path } });
+      return;
+    }
+
+    if (!hasPermission(user.role, feature)) {
+      toast.error("You do not have permission to access this page.");
+      navigate(ROLE_DASHBOARD_PATHS[user.role]);
+      return;
+    }
+
+    navigate(path);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activePortal, setActivePortal] = useState(0);
@@ -137,6 +199,18 @@ export default function LandingPage() {
   const [selectedArticle, setSelectedArticle] = useState<any | null>(null);
   const [selectedCheckoutPlan, setSelectedCheckoutPlan] = useState<any | null>(null);
   const userPlan = user?.plan || null;
+
+  // --- Auto-redirect for Dashboard ---
+  useEffect(() => {
+    if (pathname === "/dashboard") {
+      if (user) {
+        navigate(`/${user.role}/dashboard`, { replace: true });
+      } else {
+        toast.info("Please sign in to access your dashboard.");
+        navigate("/login", { replace: true });
+      }
+    }
+  }, [pathname, user, navigate]);
 
   // --- Tutors Subpage States ---
   const [tutorSearch, setTutorSearch] = useState("");
@@ -602,52 +676,6 @@ export default function LandingPage() {
       ) : (
         <section className="relative pt-24 pb-16 min-h-[70vh] bg-background">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            {pathname === "/blog" && (
-              <div className="space-y-6">
-                <div className="text-center mb-8">
-                  <span className="inline-block bg-brand-50 dark:bg-brand-950/30 text-brand-600 dark:text-brand-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-3 border border-brand-100 dark:border-brand-900 animate-fade">
-                    Blog
-                  </span>
-                  <h1 className="text-3xl font-bold text-foreground font-display">CampusLink Insights Blog</h1>
-                  <p className="text-muted-foreground text-sm mt-1 animate-fade">Recent news, academic studies, and product updates</p>
-                </div>
-                {selectedArticle ? (
-                  <div className="space-y-4">
-                    <button
-                      onClick={() => setSelectedArticle(null)}
-                      className="text-xs text-primary font-semibold hover:underline mb-4 flex items-center gap-1"
-                    >
-                      <ArrowLeft size={12} /> Back to Blog List
-                    </button>
-                    <div className="space-y-4 text-sm text-foreground/80 leading-relaxed bg-card border border-border rounded-2xl p-6 md:p-8 shadow-card">
-                      <h2 className="text-xl font-bold text-foreground leading-snug">{selectedArticle.title}</h2>
-                      <span className="text-[10px] text-primary font-medium block">{selectedArticle.date} • By {selectedArticle.author}</span>
-                      <p className="text-base font-semibold text-foreground leading-snug mt-4">{selectedArticle.excerpt}</p>
-                      <div className="border-t border-border/50 pt-4 mt-4 space-y-3">
-                        <p>Digital transformation in educational institutes plays a pivotal role in ensuring that processes are efficient, transparent, and scalable. By centralizing management features, from grade entry to attendance tracking, CampusLink ensures both students and faculty are aligned at all times.</p>
-                        <p>Our research and data collection indicates that instant communication platforms reduce administrative latency by up to 50%. The integration of smart filters and automated reports allows users to focus on high-impact tutoring and guidance rather than standard manual indexing and spreadsheets.</p>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {[
-                      { title: "AI in Modern Classrooms: The Future of Grading", date: "June 12, 2026", author: "Academic Office", excerpt: "Discover how teachers are using automated intelligence tools to evaluate marks and generate custom question banks using CampusLink AI." },
-                      { title: "Connecting Parents with Academic Analytics", date: "May 28, 2026", author: "Liaison Officer", excerpt: "Learn how our live parent portal helps bridge the communication gap between faculty and families, providing live insights on student growth." },
-                      { title: "Digital Libraries: Restructuring Campus Knowledge", date: "May 15, 2026", author: "Library Committee", excerpt: "Explore the new librarian dashboard features for real-time returns tracking, automated cataloging, and instant fine collection notifications." }
-                    ].map((b, i) => (
-                      <div key={i} className="p-5 bg-card rounded-2xl border border-border hover:border-primary/50 transition-colors shadow-card">
-                        <span className="text-[10px] text-primary font-medium">{b.date} • By {b.author}</span>
-                        <h4 onClick={() => setSelectedArticle(b)} className="font-bold text-base text-foreground mt-1 leading-snug hover:text-primary transition-colors cursor-pointer">{b.title}</h4>
-                        <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{b.excerpt}</p>
-                        <button onClick={() => setSelectedArticle(b)} className="text-xs text-primary font-semibold hover:underline mt-3 flex items-center gap-1">Read article <ArrowRight size={12} /></button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
             {pathname === "/faq" && (
               <div className="space-y-12">
                 {/* Section 1: Page Header & Search */}
@@ -1255,62 +1283,6 @@ export default function LandingPage() {
               </div>
             )}
 
-            {pathname === "/community" && (
-              <div className="space-y-6">
-                <div className="text-center mb-8">
-                  <span className="inline-block bg-sky-50 dark:bg-sky-950/30 text-sky-600 dark:text-sky-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-3 border border-sky-100 dark:border-sky-900">
-                    Community
-                  </span>
-                  <h1 className="text-3xl font-bold text-foreground font-display">CampusLink Forums</h1>
-                  <p className="text-muted-foreground text-sm mt-1">Connect with classmates, alumni, and faculty groups</p>
-                </div>
-                <div className="space-y-3">
-                  {[
-                    { channel: "#placements-2026", count: 840, desc: "Discussion on upcoming corporate campus drives, preparation questions, and interview shares." },
-                    { channel: "#technical-club", count: 520, desc: "Hackathon project planning, coding updates, and weekly developer meetups." },
-                    { channel: "#campus-life", count: 1200, desc: "General announcements, cultural events, sports meet details, and campus stories." },
-                    { channel: "#alumni-connect", count: 650, desc: "Mentorship channels connecting recent graduates with industry leaders." }
-                  ].map((c, i) => (
-                    <div key={i} className="p-4 bg-card rounded-2xl border border-border shadow-card hover:bg-muted/10 transition-colors text-left">
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="font-semibold text-sm text-foreground">{c.channel}</span>
-                        <span className="text-[10px] bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-400 font-bold px-2.5 py-0.5 rounded-full">{c.count} members</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{c.desc}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {pathname === "/scholarships" && (
-              <div className="space-y-6">
-                <div className="text-center mb-8">
-                  <span className="inline-block bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-3 border border-emerald-100 dark:border-emerald-900">
-                    Scholarships
-                  </span>
-                  <h1 className="text-3xl font-bold text-foreground font-display">Scholarships & Aid</h1>
-                  <p className="text-muted-foreground text-sm mt-1">Funding schemes and fee waivers available for student enrollment</p>
-                </div>
-                <div className="space-y-3">
-                  {[
-                    { name: "Academic Merit Scholarship", waiver: "50% Waiver", criteria: "Top 5% of class in semesters", deadline: "July 15, 2026" },
-                    { name: "Need-Based Financial Assistance", waiver: "Up to 100% Waiver", criteria: "Annual family income < ₹3,00,000", deadline: "June 30, 2026" },
-                    { name: "Sports Excellence Grant", waiver: "25% Waiver", criteria: "State or National level representation", deadline: "August 01, 2026" }
-                  ].map((s, i) => (
-                    <div key={i} className="p-4 bg-card rounded-2xl border border-border shadow-card text-left">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-bold text-sm text-foreground">{s.name}</h4>
-                        <span className="text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 font-bold px-2.5 py-0.5 rounded-full">{s.waiver}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground"><strong>Eligibility:</strong> {s.criteria}</p>
-                      <p className="text-[10px] text-rose-500 mt-1.5 font-semibold"><strong>Application Deadline:</strong> {s.deadline}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {pathname === "/about" && (
               <div className="space-y-12 text-left">
                 {/* Section 1: Page Header */}
@@ -1549,294 +1521,177 @@ export default function LandingPage() {
               </div>
             )}
 
-            {pathname === "/career" && (
-              <div className="space-y-12 text-left animate-slide-up">
-                {/* Section 1: Page Header */}
-                <div className="text-center">
-                  <span className="inline-block bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-3 border border-emerald-100 dark:border-emerald-900 shadow-sm">
-                    Career Guidance
-                  </span>
-                  <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white font-display mb-2">Student Career Pathways</h1>
-                  <p className="text-muted-foreground text-sm max-w-lg mx-auto">Explore recommended industry career paths, mapping technologies, and statistics for placements.</p>
-                </div>
-
-                {/* Section 2: Key Career Tracks (Interactive) */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 pb-2 border-b border-border">
-                    <Compass className="w-5 h-5 text-emerald-500" />
-                    <h2 className="text-lg font-bold text-foreground">Interactive Pathway Map</h2>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {[
-                      "Full Stack Web Engineering",
-                      "Data Science & AI Analyst",
-                      "Computer Networking & Cybersecurity"
-                    ].map((trackName, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setActiveCareerTrack(i)}
-                        className={cn(
-                          "px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors",
-                          activeCareerTrack === i
-                            ? "bg-emerald-600 border-emerald-600 text-white dark:bg-emerald-500 dark:border-emerald-500"
-                            : "bg-card border-border hover:bg-muted text-muted-foreground"
-                        )}
-                      >
-                        {trackName}
-                      </button>
-                    ))}
-                  </div>
-
-                  <AnimatePresence mode="wait">
-                    {activeCareerTrack === 0 && (
-                      <motion.div
-                        key="web"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="p-5 bg-card rounded-2xl border border-border shadow-card"
-                      >
-                        <span className="text-[9px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full uppercase animate-fade">Development Track</span>
-                        <h3 className="font-bold text-base text-foreground mt-3">Full Stack Web Engineering</h3>
-                        <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">Web engineers construct premium, scalable responsive web interfaces and databases. You will develop capabilities using React frameworks, TypeScript scripting, server routing protocols, and database normalizations.</p>
-                        <div className="mt-4 text-xs space-y-1.5 bg-muted/40 p-3.5 rounded-xl border border-border/50">
-                          <p><strong>Primary Frameworks:</strong> <span className="text-muted-foreground">React, TypeScript, Node.js, Express, TailwindCSS</span></p>
-                          <p><strong>Target Courses:</strong> <span className="text-primary font-medium">CS401 Web Development, CS301 Data Structures</span></p>
-                        </div>
-                      </motion.div>
-                    )}
-                    {activeCareerTrack === 1 && (
-                      <motion.div
-                        key="ai"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="p-5 bg-card rounded-2xl border border-border shadow-card"
-                      >
-                        <span className="text-[9px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full uppercase animate-fade">Intelligence Track</span>
-                        <h3 className="font-bold text-base text-foreground mt-3">Data Science & AI Analyst</h3>
-                        <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">Data scientists structure statistical algorithms and model predictive trends. Key modules focus on statistical equations, vector spaces, machine learning loops, and database queries.</p>
-                        <div className="mt-4 text-xs space-y-1.5 bg-muted/40 p-3.5 rounded-xl border border-border/50">
-                          <p><strong>Primary Languages:</strong> <span className="text-muted-foreground">Python, R, SQL, Pandas, PyTorch, Scikit-learn</span></p>
-                          <p><strong>Target Courses:</strong> <span className="text-primary font-medium">CS302 Database Systems, MA301 Engineering Math</span></p>
-                        </div>
-                      </motion.div>
-                    )}
-                    {activeCareerTrack === 2 && (
-                      <motion.div
-                        key="net"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="p-5 bg-card rounded-2xl border border-border shadow-card"
-                      >
-                        <span className="text-[9px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full uppercase animate-fade">Security Track</span>
-                        <h3 className="font-bold text-base text-foreground mt-3">Computer Networking & Cybersecurity</h3>
-                        <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">Network security architects secure server communications and restrict intrusion vectors. Students learn cryptology protocols, packet routing, firewalls, and ISO/OSI structures.</p>
-                        <div className="mt-4 text-xs space-y-1.5 bg-muted/40 p-3.5 rounded-xl border border-border/50">
-                          <p><strong>Primary Tools:</strong> <span className="text-muted-foreground">Wireshark, Linux Shell, OpenSSL, TCP/IP, Router Configurations</span></p>
-                          <p><strong>Target Courses:</strong> <span className="text-primary font-medium">CS301 Data Structures, Computer Networks (CS-Shelf)</span></p>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* Section 3: Core Skills Required Matrix */}
-                <div className="space-y-4">
-                  <h2 className="text-lg font-bold text-foreground border-b border-border pb-2">Skills Capability Matrix</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="p-4 bg-muted/40 rounded-xl border border-border">
-                      <p className="font-bold text-xs text-slate-800 dark:text-slate-200 animate-fade">System Design & DSA</p>
-                      <p className="text-[10px] text-muted-foreground mt-1">Fundamental arrays, hashing, graph searching, and scaling strategies for server configurations.</p>
-                    </div>
-                    <div className="p-4 bg-muted/40 rounded-xl border border-border">
-                      <p className="font-bold text-xs text-slate-800 dark:text-slate-200 animate-fade">Relational Database Parsing</p>
-                      <p className="text-[10px] text-muted-foreground mt-1">Normalizing schema matrices, indexing columns, SQL querying, and database backup protocols.</p>
-                    </div>
-                    <div className="p-4 bg-muted/40 rounded-xl border border-border">
-                      <p className="font-bold text-xs text-slate-800 dark:text-slate-200 animate-fade">Secure Protocol Management</p>
-                      <p className="text-[10px] text-muted-foreground mt-1">Managing SSL certificates, configuring firewalls, user role guards, and encryption at rest.</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Section 4: Placement Statistics Overview */}
-                <div className="space-y-4">
-                  <h2 className="text-lg font-bold text-foreground border-b border-border pb-2">Placement Rates & Package Metrics</h2>
-                  <div className="bg-card border border-border rounded-2xl p-5 space-y-4 shadow-sm">
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-xs font-semibold">
-                        <span className="text-slate-700 dark:text-slate-300">Engineering Placements</span>
-                        <span className="text-primary">94.8% Rate</span>
-                      </div>
-                      <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-                        <div className="h-full gradient-brand rounded-full" style={{ width: "94.8%" }} />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-xs font-semibold">
-                        <span className="text-slate-700 dark:text-slate-300">Data Science Placements</span>
-                        <span className="text-primary">89.2% Rate</span>
-                      </div>
-                      <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-                        <div className="h-full gradient-brand rounded-full" style={{ width: "89.2%" }} />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2.5 pt-3 border-t border-border/50 text-center">
-                      <div>
-                        <p className="text-base font-bold text-foreground">₹8.5 LPA</p>
-                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Average Package</p>
-                      </div>
-                      <div>
-                        <p className="text-base font-bold text-foreground">₹32 LPA</p>
-                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Highest Package</p>
-                      </div>
-                      <div>
-                        <p className="text-base font-bold text-foreground">120+</p>
-                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">Hiring Companies</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Section 5: Alumni Placements & Success Stories */}
-                <div className="space-y-4">
-                  <h2 className="text-lg font-bold text-foreground border-b border-border pb-2">Alumni Success Stories</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="p-4 bg-card border border-border rounded-xl shadow-sm space-y-2">
-                      <p className="text-xs text-muted-foreground italic leading-relaxed">"The project-based curriculum structure of CampusLink helped me gain hands-on practice. Picking Web Engineering as my path led directly to my engineer role."</p>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full gradient-brand flex items-center justify-center text-white text-xs font-bold shrink-0">
-                          S
-                        </div>
-                        <div>
-                          <p className="text-xs font-semibold text-foreground">Siddharth Sen</p>
-                          <p className="text-[9px] text-muted-foreground">Software Engineer at Google</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-4 bg-card border border-border rounded-xl shadow-sm space-y-2">
-                      <p className="text-xs text-muted-foreground italic leading-relaxed">"Analyzing database systems under the professors guided me during my placements. I strongly recommend Data Science to analytics enthusiasts."</p>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full gradient-brand flex items-center justify-center text-white text-xs font-bold shrink-0">
-                          K
-                        </div>
-                        <div>
-                          <p className="text-xs font-semibold text-foreground">Kriti Sharma</p>
-                          <p className="text-[9px] text-muted-foreground">Data Analyst at Microsoft</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+            {pathname === "/features/student-management" && <StudentManagementFeature />}
+            {pathname === "/features/teacher-management" && <TeacherManagementFeature />}
+            {pathname === "/features/attendance" && <AttendanceFeature />}
+            {pathname === "/features/library" && <LibraryFeature />}
+            {pathname === "/features/fees" && <FeesFeature />}
+            {pathname === "/features/results" && <ResultsFeature />}
+            {pathname === "/cookie-policy" && <CookiePolicyPage />}
+            {pathname === "/security-policy" && <SecurityPolicyPage />}
+            
+            {/* Multi-Tab Resource Renders */}
+            {pathname.startsWith("/resources/academic-calendar") && <AcademicCalendarResource />}
+            {pathname.startsWith("/resources/notices") && <NoticesResource />}
+            {pathname.startsWith("/resources/events") && <EventsResource />}
+            {pathname.startsWith("/resources/scholarships") && <ScholarshipsResource />}
+            {pathname.startsWith("/resources/career") && <CareerResource />}
+            {pathname.startsWith("/resources/help-center") && <HelpCenterResource />}
+            {pathname.startsWith("/resources/blog") && <BlogResource />}
+            {pathname.startsWith("/resources/community") && <CommunityResource />}
           </div>
         </section>
       )}
 
       {/* ── FOOTER ── */}
-      <footer className="bg-card border-t border-border pt-16 pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
-            {/* Brand */}
-            <div className="lg:col-span-2">
-              <Link to="/" className="flex items-center gap-2.5 mb-4">
-                <div className="w-9 h-9 rounded-xl gradient-brand flex items-center justify-center">
-                  <Shield size={17} className="text-white" />
+      <footer className="bg-card border-t border-border pt-16 pb-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-muted/20 pointer-events-none" />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-12">
+            {/* Column 1: CampusLink About */}
+            <div className="sm:col-span-2 lg:col-span-1 space-y-4">
+              <Link to="/" className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-xl gradient-brand flex items-center justify-center shadow-sm">
+                  <Shield size={16} className="text-white" />
                 </div>
-                <span className="font-bold text-lg text-foreground font-display">CampusLink</span>
+                <span className="font-bold text-base text-foreground font-display">CampusLink</span>
               </Link>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-5 max-w-xs">
+              <p className="text-xs text-muted-foreground leading-relaxed max-w-xs">
                 The modern college ERP platform built for the future of education — intelligent, connected, and beautifully designed.
               </p>
-              <div className="flex items-center gap-3">
-                <button onClick={toggleTheme} className="p-2.5 rounded-xl border border-border hover:bg-muted transition-colors" aria-label="Toggle theme">
-                  {theme === "light" ? <Moon size={16} className="text-muted-foreground" /> : <Sun size={16} className="text-muted-foreground" />}
-                </button>
-                <div className="flex items-center gap-1.5 px-3 py-2 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl">
+              
+              {/* System Status and Version */}
+              <div className="space-y-2.5 pt-1">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-100 dark:border-emerald-900/50">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">All systems operational</span>
+                  <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">All systems operational</span>
                 </div>
+                <div className="text-[10px] text-muted-foreground font-semibold">
+                  Version <span className="bg-muted px-2 py-0.5 rounded border border-border/80 text-foreground">v1.0</span>
+                </div>
+              </div>
+
+              {/* Social Media Icons */}
+              <div className="flex items-center gap-3 pt-2">
+                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="p-2 bg-muted/40 hover:bg-primary/10 text-muted-foreground hover:text-primary rounded-xl border border-border transition-all" aria-label="Twitter">
+                  <Twitter size={14} />
+                </a>
+                <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="p-2 bg-muted/40 hover:bg-primary/10 text-muted-foreground hover:text-primary rounded-xl border border-border transition-all" aria-label="GitHub">
+                  <Github size={14} />
+                </a>
+                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="p-2 bg-muted/40 hover:bg-primary/10 text-muted-foreground hover:text-primary rounded-xl border border-border transition-all" aria-label="LinkedIn">
+                  <Linkedin size={14} />
+                </a>
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="p-2 bg-muted/40 hover:bg-primary/10 text-muted-foreground hover:text-primary rounded-xl border border-border transition-all" aria-label="Facebook">
+                  <Facebook size={14} />
+                </a>
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="p-2 bg-muted/40 hover:bg-primary/10 text-muted-foreground hover:text-primary rounded-xl border border-border transition-all" aria-label="Instagram">
+                  <Instagram size={14} />
+                </a>
               </div>
             </div>
 
-
-
-            {/* Resources */}
+            {/* Column 2: Features */}
             <div>
-              <h4 className="text-sm font-bold text-foreground mb-4 uppercase tracking-wider">Resources</h4>
-              <ul className="space-y-2.5">
-                {FOOTER_RESOURCES.map(item => {
-                  const keyMap: Record<string, string> = {
-                    "Blog": "/blog",
-                    "FAQ": "/faq",
-                    "Tutors": "/tutors",
-                    "Community": "/community",
-                    "Scholarships": "/scholarships",
-                    "Courses": "/courses",
-                    "Career Guidance": "/career"
-                  };
-                  const path = keyMap[item] || "/";
-                  return (
-                    <li key={item}>
-                      <Link
-                        to={path}
-                        onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); setSelectedArticle(null); }}
-                        className="text-sm text-muted-foreground hover:text-foreground transition-colors text-left"
-                      >
-                        {item}
-                      </Link>
-                    </li>
-                  );
-                })}
+              <h4 className="text-xs font-bold text-foreground mb-4 uppercase tracking-wider">Features</h4>
+              <ul className="space-y-2">
+                {[
+                  { name: "Student Management", path: "/features/student-management" },
+                  { name: "Teacher Management", path: "/features/teacher-management" },
+                  { name: "Attendance Tracking", path: "/features/attendance" },
+                  { name: "Library Management", path: "/features/library" },
+                  { name: "Fee Management", path: "/features/fees" },
+                  { name: "Exam & Results", path: "/features/results" },
+                  { name: "Courses Overview", path: "/courses" }
+                ].map(item => (
+                  <li key={item.name}>
+                    <Link
+                      to={item.path}
+                      onClick={(e) => handleFeatureClick(e, item.path)}
+                      className="text-xs text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 inline-block transform duration-250"
+                    >
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
 
-            {/* Company */}
+            {/* Column 3: Quick Links */}
             <div>
-              <h4 className="text-sm font-bold text-foreground mb-4 uppercase tracking-wider">Company</h4>
-              <ul className="space-y-2.5">
-                {FOOTER_COMPANY.map(item => {
-                  const keyMap: Record<string, string> = {
-                    "About Us": "/about",
-                    "Contact": "/contact",
-                    "Privacy Policy": "/privacy",
-                    "Terms of Service": "/terms"
-                  };
-                  const path = keyMap[item] || "/";
-                  return (
-                    <li key={item}>
-                      <Link
-                        to={path}
-                        onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        {item}
-                      </Link>
-                    </li>
-                  );
-                })}
+              <h4 className="text-xs font-bold text-foreground mb-4 uppercase tracking-wider">Quick Links</h4>
+              <ul className="space-y-2">
+                {[
+                  { name: "Home", path: "/" },
+                  { name: "Login", path: "/login" },
+                  { name: "Register", path: "/register" },
+                  { name: "Dashboard", path: "/dashboard" },
+                  { name: "Contact Us", path: "/contact" },
+                  { name: "FAQ", path: "/faq" },
+                  { name: "Pricing", path: "/pricing" }
+                ].map(item => (
+                  <li key={item.name}>
+                    <Link to={item.path} onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); }} className="text-xs text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 inline-block transform duration-250">
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Column 4: Resources */}
+            <div>
+              <h4 className="text-xs font-bold text-foreground mb-4 uppercase tracking-wider">Resources</h4>
+              <ul className="space-y-2">
+                {[
+                  { name: "Academic Calendar", path: "/resources/academic-calendar/semester-schedule" },
+                  { name: "Notices Board", path: "/resources/notices/circulars" },
+                  { name: "Events & Activities", path: "/resources/events/upcoming-events" },
+                  { name: "Scholarships & Aid", path: "/resources/scholarships/government-scholarships" },
+                  { name: "Career Guidance", path: "/resources/career/career-counseling" },
+                  { name: "Help Center", path: "/resources/help-center/faq" },
+                  { name: "Insights Blog", path: "/resources/blog/education-news" },
+                  { name: "Forums Community", path: "/resources/community/student-discussions" }
+                ].map(item => (
+                  <li key={item.name}>
+                    <Link to={item.path} onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); }} className="text-xs text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 inline-block transform duration-250">
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Column 5: Legal / Company */}
+            <div>
+              <h4 className="text-xs font-bold text-foreground mb-4 uppercase tracking-wider">Company</h4>
+              <ul className="space-y-2">
+                {[
+                  { name: "About Us", path: "/about" },
+                  { name: "Privacy Policy", path: "/privacy" },
+                  { name: "Terms of Service", path: "/terms" },
+                  { name: "Cookie Policy", path: "/cookie-policy" },
+                  { name: "Security Policy", path: "/security-policy" }
+                ].map(item => (
+                  <li key={item.name}>
+                    <Link to={item.path} onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); }} className="text-xs text-muted-foreground hover:text-primary transition-colors hover:translate-x-1 inline-block transform duration-250">
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
 
-          {/* Bottom bar */}
-          <div className="border-t border-border pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} CampusLink. All rights reserved.
-            </p>
+          {/* Bottom Bar */}
+          <div className="border-t border-border pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+            <p>&copy; {new Date().getFullYear()} CampusLink ERP. All rights reserved.</p>
             <div className="flex items-center gap-4">
-              <Link to="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy</Link>
-              <Link to="/terms" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms</Link>
-              {user ? (
-                <Link to={`/${user.role}/dashboard`} className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">Dashboard</Link>
-              ) : (
-                <Link to="/login" className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">Sign In</Link>
-              )}
+              <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+              <span className="text-muted/40">|</span>
+              <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+              <span className="text-muted/40">|</span>
+              <Link to="/security-policy" className="hover:text-foreground transition-colors">Security Audit</Link>
             </div>
           </div>
         </div>
