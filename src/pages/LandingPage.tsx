@@ -53,11 +53,11 @@ const FOOTER_COMPANY = ["About Us", "Contact", "Privacy Policy", "Terms of Servi
 
 
 const PORTALS = [
-  { role: "Admin", icon: Shield, color: "from-violet-500 to-indigo-600", desc: "Full institutional control — manage students, teachers, fees, courses, and analytics.", features: ["User Management", "Fee Oversight", "Reports & Analytics", "Notice Management"] },
-  { role: "Teacher", icon: GraduationCap, color: "from-sky-500 to-blue-600", desc: "Digital tools for attendance, marks entry, study material uploads, and AI assistance.", features: ["Digital Attendance", "Marks & Grades", "Study Materials", "AI Question Generator"] },
-  { role: "Student", icon: BookOpen, color: "from-emerald-500 to-teal-600", desc: "Access results, timetable, assignments, notes, and personalized performance insights.", features: ["Attendance Reports", "Results & Grades", "Assignment Submission", "AI Study Assistant"] },
-  { role: "Parent", icon: Users, color: "from-amber-500 to-orange-600", desc: "Monitor your child's progress, attendance, academic growth, and communicate with teachers.", features: ["Live Attendance Tracking", "Academic Progress", "Teacher Communication", "Growth Analytics"] },
-  { role: "Librarian", icon: BookMarked, color: "from-rose-500 to-pink-600", desc: "Manage the full library lifecycle from books and categories to issuing, returns, and fines.", features: ["Book Catalog", "Issue & Returns", "Fine Management", "AI Library Assistant"] },
+  { role: "Admin", icon: Shield, color: "gradient-brand", desc: "Full institutional control — manage students, teachers, fees, courses, and analytics.", features: ["User Management", "Fee Oversight", "Reports & Analytics", "Notice Management"] },
+  { role: "Teacher", icon: GraduationCap, color: "gradient-brand", desc: "Digital tools for attendance, marks entry, study material uploads, and AI assistance.", features: ["Digital Attendance", "Marks & Grades", "Study Materials", "AI Question Generator"] },
+  { role: "Student", icon: BookOpen, color: "gradient-brand", desc: "Access results, timetable, assignments, notes, and personalized performance insights.", features: ["Attendance Reports", "Results & Grades", "Assignment Submission", "AI Study Assistant"] },
+  { role: "Parent", icon: Users, color: "gradient-brand", desc: "Monitor your child's progress, attendance, academic growth, and communicate with teachers.", features: ["Live Attendance Tracking", "Academic Progress", "Teacher Communication", "Growth Analytics"] },
+  { role: "Librarian", icon: BookMarked, color: "gradient-brand", desc: "Manage the full library lifecycle from books and categories to issuing, returns, and fines.", features: ["Book Catalog", "Issue & Returns", "Fine Management", "AI Library Assistant"] },
 ];
 
 const STATS = [
@@ -385,6 +385,7 @@ export default function LandingPage() {
   const [resourceSearchQuery, setResourceSearchQuery] = useState("");
   const [resourceFeedbackName, setResourceFeedbackName] = useState("");
   const [resourceFeedbackEmail, setResourceFeedbackEmail] = useState("");
+  const [resourceFeedbackCategory, setResourceFeedbackCategory] = useState("General");
   const [resourceFeedbackMsg, setResourceFeedbackMsg] = useState("");
 
   // --- Landing Page 10 Sections States ---
@@ -419,16 +420,11 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* ── NAVBAR ── */}
-      <nav className={cn(
-        "fixed top-0 inset-x-0 z-50 transition-all duration-300",
-        (scrolled || mobileMenuOpen || isSubPage)
-          ? "bg-background/95 backdrop-blur-md border-b border-border shadow-sm"
-          : "bg-transparent border-b border-transparent"
-      )}>
+      <nav className="fixed top-0 inset-x-0 z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
+            <Link to="/" onClick={() => { window.scrollTo({ top: 0, behavior: "instant" as any }); }} className="flex items-center gap-2.5 flex-shrink-0">
               <div className="w-9 h-9 rounded-xl gradient-brand flex items-center justify-center shadow-sm">
                 <Shield size={18} className="text-white" />
               </div>
@@ -747,44 +743,6 @@ export default function LandingPage() {
             </div>
           </section>
 
-          {/* ── Section 3: PLATFORM / FEATURES GRID ── */}
-          <section id="features" className="py-20 lg:py-24 bg-muted/20 border-b border-border">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
-                <span className="inline-block bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-3 border border-indigo-100 dark:border-indigo-900 shadow-sm font-display">
-                  Platform Core Modules
-                </span>
-                <h2 className="text-3xl sm:text-4xl font-bold text-foreground font-display mb-4">Powerful ERP Features</h2>
-                <p className="text-muted-foreground text-sm max-w-lg mx-auto">Explore key operations modules. Click a module below to test its role-restricted direct navigation flow.</p>
-              </motion.div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                  { title: "Student Management", icon: GraduationCap, path: "/features/student-management", desc: "Administer student admissions, records profile updates, search directories, and document statuses." },
-                  { title: "Teacher Management", icon: UserCheck, path: "/features/teacher-management", desc: "Organize tutor list records, department distributions, teaching logs, and custom roles assignments." },
-                  { title: "Attendance Tracking", icon: Calendar, path: "/features/attendance", desc: "Log class hourly attendance sheets, compile absent thresholds, and flag low percentage levels." },
-                  { title: "Library Management", icon: BookMarked, path: "/features/library", desc: "Track book catalog lists, log issue & return dates, calculate library dues, and run inventory reviews." },
-                  { title: "Fee Management", icon: DollarSign, path: "/features/fees", desc: "Setup academic invoice templates, trace transaction receipts, audit payments status, and invoice dues." },
-                  { title: "Exams & Results", icon: Award, path: "/features/results", desc: "Register exam calendars, record subject marks cards, calculate CGPA levels, and export grades PDF sheets." }
-                ].map((f, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
-                    className="group bg-card border border-border rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-brand-500/35 transition-all duration-300 text-left flex flex-col justify-between">
-                    <div>
-                      <div className="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center text-white mb-5 shadow-sm group-hover:scale-105 transition-transform">
-                        <f.icon size={18} />
-                      </div>
-                      <h3 className="font-bold text-base text-foreground mb-2 font-display">{f.title}</h3>
-                      <p className="text-muted-foreground text-xs leading-relaxed mb-6">{f.desc}</p>
-                    </div>
-                    <Link to={f.path} onClick={(e) => handleFeatureClick(e, f.path)}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 dark:text-brand-400 group-hover:gap-2.5 transition-all">
-                      Open Module <ArrowRight size={13} />
-                    </Link>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </section>
 
           {/* ── Section 4: STAKEHOLDER PORTALS SHOWCASE ── */}
           <section id="portals" className="py-20 lg:py-24 bg-card border-b border-border">
@@ -2602,7 +2560,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-12">
             {/* Column 1: CampusLink About */}
             <div className="sm:col-span-2 lg:col-span-1 space-y-4">
-              <Link to="/" className="flex items-center gap-2 mb-3">
+              <Link to="/" onClick={() => { window.scrollTo({ top: 0, behavior: "instant" as any }); }} className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 rounded-xl gradient-brand flex items-center justify-center shadow-sm">
                   <Shield size={16} className="text-white" />
                 </div>
@@ -2648,11 +2606,6 @@ export default function LandingPage() {
               <h4 className="text-xs font-bold text-foreground mb-4 uppercase tracking-wider">Features</h4>
               <ul className="space-y-2">
                 {[
-                  { name: "Student Management", path: "/features/student-management" },
-                  { name: "Teacher Management", path: "/features/teacher-management" },
-                  { name: "Attendance Tracking", path: "/features/attendance" },
-                  { name: "Library Management", path: "/features/library" },
-                  { name: "Fee Management", path: "/features/fees" },
                   { name: "Exam & Results", path: "/features/results" },
                   { name: "Courses Overview", path: "/courses" }
                 ].map(item => (
@@ -2674,10 +2627,8 @@ export default function LandingPage() {
               <h4 className="text-xs font-bold text-foreground mb-4 uppercase tracking-wider">Quick Links</h4>
               <ul className="space-y-2">
                 {[
-                  { name: "Home", path: "/" },
                   { name: "Login", path: "/login" },
                   { name: "Register", path: "/register" },
-                  { name: "Dashboard", path: "/dashboard" },
                   { name: "Contact Us", path: "/contact" },
                   { name: "FAQ", path: "/faq" },
                   { name: "Pricing", path: "/pricing" }

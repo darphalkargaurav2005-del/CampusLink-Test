@@ -31,7 +31,7 @@ export default function TeacherLayout() {
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         roleName="Teacher Portal"
-        roleColor="bg-sky-600"
+        roleColor="gradient-brand"
       />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Navbar

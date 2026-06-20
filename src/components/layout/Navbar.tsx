@@ -171,10 +171,10 @@ export default function Navbar({ onMenuToggle, sidebarOpen, title }: NavbarProps
 
   const roleColors: Record<string, string> = {
     admin: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400",
-    teacher: "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400",
-    student: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-    parent: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-    librarian: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
+    teacher: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400",
+    student: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400",
+    parent: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400",
+    librarian: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400",
   };
 
   const currentRoleItems = ROLE_NAV_ITEMS[user?.role ?? "admin"] || [];

@@ -31,7 +31,7 @@ export default function LibrarianLayout() {
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         roleName="Library Portal"
-        roleColor="bg-rose-600"
+        roleColor="gradient-brand"
       />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Navbar

@@ -12,6 +12,7 @@ export interface User {
   teacherId?: string;
   childName?: string;
   joinDate?: string;
+  plan?: string;
 }
 
 export interface Student {

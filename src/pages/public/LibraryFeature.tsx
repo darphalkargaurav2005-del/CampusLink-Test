@@ -36,7 +36,7 @@ export default function LibraryFeature() {
   return (
     <div className="space-y-12">
       {/* Hero Banner */}
-      <div className="relative rounded-3xl overflow-hidden p-8 sm:p-12 bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg">
+      <div className="relative rounded-3xl overflow-hidden p-8 sm:p-12 gradient-brand text-white shadow-lg">
         <div className="absolute inset-0 bg-black/10" />
         <div className="relative z-10 max-w-2xl">
           <span className="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-semibold uppercase tracking-wider mb-4">

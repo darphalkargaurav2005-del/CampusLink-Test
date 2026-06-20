@@ -56,7 +56,10 @@ export default function Assignments() {
     } else {
       const newA: Assignment = {
         id: `a${Date.now()}`,
-        ...data,
+        title: data.title,
+        description: data.description,
+        courseName: data.courseName,
+        dueDate: data.dueDate,
         maxMarks: Number(data.maxMarks),
         courseId: "c1",
         teacherId: "t1",

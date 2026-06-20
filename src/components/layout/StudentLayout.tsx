@@ -30,7 +30,7 @@ export default function StudentLayout() {
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         roleName="Student Portal"
-        roleColor="bg-emerald-600"
+        roleColor="gradient-brand"
       />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Navbar

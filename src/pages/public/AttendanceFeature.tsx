@@ -62,7 +62,7 @@ export default function AttendanceFeature() {
   return (
     <div className="space-y-12">
       {/* Hero Banner */}
-      <div className="relative rounded-3xl overflow-hidden p-8 sm:p-12 bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg">
+      <div className="relative rounded-3xl overflow-hidden p-8 sm:p-12 gradient-brand text-white shadow-lg">
         <div className="absolute inset-0 bg-black/10" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="max-w-2xl">

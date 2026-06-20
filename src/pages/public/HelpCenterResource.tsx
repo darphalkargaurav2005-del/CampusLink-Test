@@ -71,7 +71,7 @@ export default function HelpCenterResource() {
   return (
     <div className="space-y-8">
       {/* Header banner */}
-      <div className="relative rounded-3xl overflow-hidden p-6 sm:p-10 bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-lg">
+      <div className="relative rounded-3xl overflow-hidden p-6 sm:p-10 gradient-brand text-white shadow-lg">
         <div className="absolute inset-0 bg-black/10" />
         <div className="relative z-10 max-w-2xl">
           <span className="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-semibold uppercase tracking-wider mb-3">

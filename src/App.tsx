@@ -240,14 +240,14 @@ function ScrollToTop() {
           clearInterval(interval);
         } else if (attempts > 10) {
           clearInterval(interval);
-          window.scrollTo(0, 0);
+          window.scrollTo({ top: 0, behavior: "instant" as any });
         }
         attempts++;
       }, 100);
 
       return () => clearInterval(interval);
     } else {
-      window.scrollTo(0, 0);
+      window.scrollTo({ top: 0, behavior: "instant" as any });
     }
   }, [pathname, hash]);
 

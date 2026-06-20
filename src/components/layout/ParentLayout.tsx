@@ -28,7 +28,7 @@ export default function ParentLayout() {
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         roleName="Parent Portal"
-        roleColor="bg-amber-600"
+        roleColor="gradient-brand"
       />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Navbar
