@@ -1260,19 +1260,19 @@ export default function LandingPage() {
                 </div>
 
                 {/* Right console output */}
-                <div className="lg:col-span-7 bg-slate-900 text-slate-100 rounded-2xl p-5 font-mono text-[11px] leading-relaxed shadow-lg flex flex-col justify-between min-h-[300px]">
+                <div className="lg:col-span-7 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-2xl p-5 font-mono text-[11px] leading-relaxed shadow-lg flex flex-col justify-between min-h-[300px] border border-slate-200 dark:border-slate-800/80">
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between pb-2.5 border-b border-slate-800">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">AI Terminal Sandbox</span>
+                    <div className="flex items-center justify-between pb-2.5 border-b border-slate-200 dark:border-slate-800/80">
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">AI Terminal Sandbox</span>
                       <div className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded-full bg-slate-800" />
-                        <span className="w-2.5 h-2.5 rounded-full bg-slate-800" />
-                        <span className="w-2.5 h-2.5 rounded-full bg-slate-800" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-slate-800" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-slate-800" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-slate-800" />
                       </div>
                     </div>
-                    <div className="whitespace-pre-wrap font-sans text-slate-350">{aiResponse}</div>
+                    <div className="whitespace-pre-wrap font-sans text-slate-700 dark:text-slate-300">{aiResponse}</div>
                   </div>
-                  <div className="text-[9px] text-slate-500 border-t border-slate-800 pt-2 mt-4">
+                  <div className="text-[9px] text-slate-400 dark:text-slate-500 border-t border-slate-200 dark:border-slate-800/80 pt-2 mt-4">
                     Response time: 1.2s • Model version: Llama-3-CampusLink-70B
                   </div>
                 </div>
